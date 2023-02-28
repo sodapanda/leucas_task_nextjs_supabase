@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
 import { ActionIcon } from '@mantine/core';
-import { useSupabaseClient } from '@supabase/auth-helpers-react';
-import { IconBrandVolkswagen } from '@tabler/icons';
+import { format } from 'date-fns';
+import { useSupabaseClient, useUser } from '@supabase/auth-helpers-react';
+import { IconBrandVolkswagen, IconRefreshDot, IconChecks } from '@tabler/icons';
 
 export default function Clock() {
   const supabase = useSupabaseClient();
+  const user = useUser();
   const [selectedTasks, setSelectedTasks] = useState<any[]>([]);
+  const formattedDate = format(new Date(), 'yyyy/MM/dd');
 
   function shuffleArray(array: any[]) {
     for (let i = array.length - 1; i > 0; i--) {
@@ -49,9 +52,33 @@ export default function Clock() {
   return (
     <div className="w-full">
       <div className="w-full flex flex-row items-center justify-around bg-blue-50">
-        <h4>{new Date().toLocaleDateString()}</h4>
+        <h4>{formattedDate}</h4>
         <ActionIcon color="blue" variant="filled" onClick={handleSelectTasks}>
-          <IconBrandVolkswagen size={18} />
+          <IconRefreshDot size={18} />
+        </ActionIcon>
+        <ActionIcon
+          color="blue"
+          variant="filled"
+          onClick={async () => {
+            for (const taskItem of selectedTasks) {
+              const { data, error } = await supabase.from('task_history').insert([
+                {
+                  task_date: formattedDate,
+                  task_id: taskItem.id,
+                  task_category: taskItem.category_name,
+                  task_name: taskItem.task_name,
+                  duration: '01:02:03',
+                  user_id: user?.id,
+                },
+              ]);
+              if (error) {
+                console.log(error);
+              }
+              console.log(data);
+            }
+          }}
+        >
+          <IconChecks size={18} />
         </ActionIcon>
       </div>
 
