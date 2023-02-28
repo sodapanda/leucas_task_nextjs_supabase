@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
-import { useUser, useSupabaseClient, Session } from '@supabase/auth-helpers-react';
-import { Database } from '../../utils/database.types';
+import { useUser, useSupabaseClient, useSession } from '@supabase/auth-helpers-react';
+import Avatar from '../components/Account/Avatar';
+
+import { Database } from '../utils/database.types';
 type Profiles = Database['public']['Tables']['profiles']['Row'];
 
-export default function Account({ session }: { session: Session }) {
+export default function Account() {
   const supabase = useSupabaseClient<Database>();
   const user = useUser();
   const [loading, setLoading] = useState(true);
@@ -11,37 +13,39 @@ export default function Account({ session }: { session: Session }) {
   const [website, setWebsite] = useState<Profiles['website']>(null);
   const [avatar_url, setAvatarUrl] = useState<Profiles['avatar_url']>(null);
 
+  const session = useSession();
+
   useEffect(() => {
-    getProfile();
-  }, [session]);
+    async function getProfile() {
+      try {
+        setLoading(true);
+        if (!user) throw new Error('No user');
 
-  async function getProfile() {
-    try {
-      setLoading(true);
-      if (!user) throw new Error('No user');
+        let { data, error, status } = await supabase
+          .from('profiles')
+          .select(`username, website, avatar_url`)
+          .eq('id', user.id)
+          .single();
 
-      let { data, error, status } = await supabase
-        .from('profiles')
-        .select(`username, website, avatar_url`)
-        .eq('id', user.id)
-        .single();
+        if (error && status !== 406) {
+          throw error;
+        }
 
-      if (error && status !== 406) {
-        throw error;
+        if (data) {
+          setUsername(data.username);
+          setWebsite(data.website);
+          setAvatarUrl(data.avatar_url);
+        }
+      } catch (error) {
+        alert('Error loading user data!');
+        console.log(error);
+      } finally {
+        setLoading(false);
       }
-
-      if (data) {
-        setUsername(data.username);
-        setWebsite(data.website);
-        setAvatarUrl(data.avatar_url);
-      }
-    } catch (error) {
-      alert('Error loading user data!');
-      console.log(error);
-    } finally {
-      setLoading(false);
     }
-  }
+
+    getProfile();
+  }, [session, user, supabase]);
 
   async function updateProfile({
     username,
@@ -77,9 +81,18 @@ export default function Account({ session }: { session: Session }) {
 
   return (
     <div className="form-widget">
+      <Avatar
+        uid={user!.id}
+        url={avatar_url}
+        size={150}
+        onUpload={(url) => {
+          setAvatarUrl(url);
+          updateProfile({ username, website, avatar_url: url });
+        }}
+      />
       <div>
         <label htmlFor="email">Email</label>
-        <input id="email" type="text" value={session.user.email} disabled />
+        <input id="email" type="text" value={session?.user.email} disabled />
       </div>
       <div>
         <label htmlFor="username">Username</label>

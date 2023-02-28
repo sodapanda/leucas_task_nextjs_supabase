@@ -1,11 +1,13 @@
 import { useState } from 'react';
-import NextApp, { AppProps, AppContext } from 'next/app';
-import { getCookie, setCookie } from 'cookies-next';
+import { AppProps } from 'next/app';
 import Head from 'next/head';
 import { MantineProvider, ColorScheme, ColorSchemeProvider } from '@mantine/core';
 import { NotificationsProvider } from '@mantine/notifications';
 import { createBrowserSupabaseClient } from '@supabase/auth-helpers-nextjs';
 import { SessionContextProvider, Session } from '@supabase/auth-helpers-react';
+import { Tabs } from '@mantine/core';
+import { useRouter } from 'next/router';
+
 import '../globals.css';
 
 export default function App({
@@ -14,7 +16,7 @@ export default function App({
 }: AppProps<{
   initialSession: Session;
 }>) {
-  const [colorScheme, setColorScheme] = useState<ColorScheme>('dark');
+  const [colorScheme, setColorScheme] = useState<ColorScheme>('light');
 
   const toggleColorScheme = (value?: ColorScheme) => {
     const nextColorScheme = value || (colorScheme === 'dark' ? 'light' : 'dark');
@@ -22,6 +24,9 @@ export default function App({
   };
 
   const [supabase] = useState(() => createBrowserSupabaseClient());
+
+  const [activeTab, setActiveTab] = useState<string | null>('/clock');
+  const router = useRouter();
 
   return (
     <>
@@ -35,7 +40,30 @@ export default function App({
         <ColorSchemeProvider colorScheme={colorScheme} toggleColorScheme={toggleColorScheme}>
           <MantineProvider theme={{ colorScheme }} withGlobalStyles withNormalizeCSS>
             <NotificationsProvider>
-              <Component {...pageProps} />
+              <div className="w-screen">
+                <div className="w-full sm:w-96 ml-auto mr-auto flex flex-col">
+                  <Tabs
+                    className="mt-8 ml-4"
+                    variant="outline"
+                    radius="lg"
+                    value={activeTab}
+                    onTabChange={(value) => {
+                      setActiveTab(value);
+                      router.push(`${value}`);
+                    }}
+                  >
+                    <Tabs.List>
+                      <Tabs.Tab value="/clock">打卡</Tabs.Tab>
+                      <Tabs.Tab value="/taskcategory">任务分类</Tabs.Tab>
+                      <Tabs.Tab value="/history">历史</Tabs.Tab>
+                      <Tabs.Tab value="/account">个人</Tabs.Tab>
+                    </Tabs.List>
+                  </Tabs>
+                  <div className="w-full grow shrink-0 ml-4 mr-4">
+                    <Component {...pageProps} />
+                  </div>
+                </div>
+              </div>
             </NotificationsProvider>
           </MantineProvider>
         </ColorSchemeProvider>

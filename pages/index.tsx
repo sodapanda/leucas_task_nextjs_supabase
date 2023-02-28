@@ -1,22 +1,27 @@
-import { Welcome } from '../components/Welcome/Welcome';
 import { ColorSchemeToggle } from '../components/ColorSchemeToggle/ColorSchemeToggle';
 import { Auth } from '@supabase/auth-ui-react';
 import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react';
-import Account from '../components/Account/Account';
+import { useRouter } from 'next/router';
 
 export default function HomePage() {
   const session = useSession();
   const supabase = useSupabaseClient();
+  const router = useRouter();
 
-  return (
-    <>
-      <Welcome />
-      <ColorSchemeToggle />
-      <h1 className="text-3xl font-bold underline">Hello world!</h1>
+  if (session) {
+    router.push('/clock');
 
-      <div className="container" style={{ padding: '50px 0 100px 0' }}>
-        {!session ? <Auth supabaseClient={supabase} /> : <Account session={session} />}
+    return (
+      <div>
+        <h3>已经登陆</h3>
+        <ColorSchemeToggle />
       </div>
-    </>
-  );
+    );
+  } else {
+    return (
+      <div className="w-full overflow-x bg-red-50">
+        <Auth supabaseClient={supabase} />
+      </div>
+    );
+  }
 }
