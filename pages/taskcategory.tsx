@@ -32,7 +32,7 @@ export default function TaskCategory() {
   }
 
   return (
-    <div>
+    <div className="w-full">
       <h3>任务分类</h3>
       <Box className="w-full">
         <form

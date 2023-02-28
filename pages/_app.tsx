@@ -43,7 +43,6 @@ export default function App({
               <div className="w-screen">
                 <div className="w-full sm:w-96 ml-auto mr-auto flex flex-col">
                   <Tabs
-                    className="mt-8 ml-4"
                     variant="outline"
                     radius="lg"
                     value={activeTab}
@@ -59,7 +58,7 @@ export default function App({
                       <Tabs.Tab value="/account">个人</Tabs.Tab>
                     </Tabs.List>
                   </Tabs>
-                  <div className="w-full grow shrink-0 ml-4 mr-4">
+                  <div className="w-full grow shrink-0">
                     <Component {...pageProps} />
                   </div>
                 </div>
