@@ -6,7 +6,6 @@ import { useInterval } from '@mantine/hooks';
 import {
   IconBrandVolkswagen,
   IconRefreshDot,
-  IconFileUpload,
   IconPlayerPlay,
   IconPlayerPause,
 } from '@tabler/icons';
@@ -26,42 +25,8 @@ export default function Clock() {
   const [showGenBtn, setShowGenBtn] = useState(false);
   const formattedDate = format(new Date(), 'yyyy/MM/dd');
 
-  const intv = useInterval(() => {
-    setSelectedTasks((tasks) => {
-      const cTasks = tasks.slice();
-      const target = cTasks.find((task) => task.status === statusRuning);
-      if (target) {
-        target.duration = TimeFormat.fromS(TimeFormat.toS(target.duration) + 1, 'hh:mm:ss');
-
-        let totalS = 0;
-        for (const task of cTasks) {
-          totalS = totalS + TimeFormat.toS(task.duration);
-        }
-        setDuration(TimeFormat.fromS(totalS, 'hh:mm:ss'));
-
-        if (totalS % 10 === 0) {
-        }
-      }
-      return cTasks;
-    });
-  }, 1000);
-
   useEffect(() => {
-    supabase
-      .from('task_history')
-      .select('*')
-      .eq('task_date', formattedDate)
-      .then(({ error, data }) => {
-        if (!error && data.length > 0) {
-          data.map((item) => {
-            item.status = 'stoped';
-            return item;
-          });
-          console.log(data);
-          setSelectedTasks(data);
-        }
-      });
-
+    getHistory();
     supabase
       .from('daily_product_count')
       .select('*')
@@ -77,13 +42,62 @@ export default function Clock() {
     };
   }, []);
 
+  const intv = useInterval(() => {
+    setSelectedTasks((tasks) => {
+      const cTasks = tasks.slice();
+      const target = cTasks.find((task) => task.status === statusRuning);
+      if (target) {
+        target.duration = TimeFormat.fromS(TimeFormat.toS(target.duration) + 1, 'hh:mm:ss');
+
+        let totalS = 0;
+        for (const task of cTasks) {
+          totalS = totalS + TimeFormat.toS(task.duration);
+        }
+        setDuration(TimeFormat.fromS(totalS, 'hh:mm:ss'));
+
+        if (totalS % 60 === 0) {
+          const deepCopiedTaskList = JSON.parse(JSON.stringify(cTasks)) as any[];
+          deepCopiedTaskList.map((item) => {
+            item.status = undefined;
+            return item;
+          });
+          supabase
+            .from('task_history')
+            .upsert(deepCopiedTaskList, { onConflict: 'id' })
+            .then((res) => {
+              console.log(res);
+            });
+        }
+      }
+      return cTasks;
+    });
+  }, 1000);
+
   useEffect(() => {
+    // console.log(selectedTasks);
     if (selectedTasks && selectedTasks.length > 0) {
       setShowGenBtn(false);
     } else {
       setShowGenBtn(true);
     }
   }, [selectedTasks]);
+
+  function getHistory() {
+    supabase
+      .from('task_history')
+      .select('*')
+      .eq('task_date', formattedDate)
+      .then(({ error, data }) => {
+        if (!error && data.length > 0) {
+          data.map((item) => {
+            item.status = 'stoped';
+            return item;
+          });
+          // console.log(data);
+          setSelectedTasks(data);
+        }
+      });
+  }
 
   function shuffleArray(array: any[]) {
     for (let i = array.length - 1; i > 0; i--) {
@@ -99,10 +113,10 @@ export default function Clock() {
       return;
     }
     data.map((item) => (item.status = 'stoped'));
-    console.log(JSON.stringify(data));
+    // console.log(JSON.stringify(data));
 
     shuffleArray(data);
-    console.log(JSON.stringify(data));
+    // console.log(JSON.stringify(data));
     // 复制一份原始任务数组
     const availableTasks = data.slice();
     const selectedTasks: any[] = [];
@@ -122,12 +136,24 @@ export default function Clock() {
       }
     }
 
-    selectedTasks.map((item) => {
-      item.duration = '00:00:00';
-      return item;
-    });
+    const taskList = [];
+    for (const taskItem of selectedTasks) {
+      taskList.push({
+        task_date: formattedDate,
+        task_id: taskItem.id,
+        task_category: taskItem.category_name,
+        task_name: taskItem.task_name,
+        duration: '00:00:00',
+        user_id: user?.id,
+      });
+    }
 
-    setSelectedTasks(selectedTasks);
+    const history = await supabase.from('task_history').insert(taskList);
+    if (history.error) {
+      console.log(history.error);
+    }
+
+    getHistory();
   }
 
   function timerClick(id: number, action: string) {
@@ -170,31 +196,6 @@ export default function Clock() {
             <IconRefreshDot size={18} />
           </ActionIcon>
         )}
-
-        <ActionIcon
-          color="teal"
-          variant="filled"
-          onClick={async () => {
-            for (const taskItem of selectedTasks) {
-              const { data, error } = await supabase.from('task_history').insert([
-                {
-                  task_date: formattedDate,
-                  task_id: taskItem.id,
-                  task_category: taskItem.category_name,
-                  task_name: taskItem.task_name,
-                  duration: taskItem.duration,
-                  user_id: user?.id,
-                },
-              ]);
-              if (error) {
-                console.log(error);
-              }
-              console.log(data);
-            }
-          }}
-        >
-          <IconFileUpload size={18} />
-        </ActionIcon>
       </div>
 
       {selectedTasks.length > 0 &&
