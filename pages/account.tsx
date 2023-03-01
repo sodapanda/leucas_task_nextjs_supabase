@@ -24,7 +24,7 @@ export default function Account() {
         let { data, error, status } = await supabase
           .from('profiles')
           .select(`username, website, avatar_url`)
-          .eq('id', user.id)
+          .eq('id', user?.id)
           .single();
 
         if (error && status !== 406) {
@@ -61,7 +61,7 @@ export default function Account() {
       if (!user) throw new Error('No user');
 
       const updates = {
-        id: user.id,
+        id: user?.id,
         username,
         website,
         avatar_url,
@@ -82,7 +82,7 @@ export default function Account() {
   return (
     <div className="form-widget">
       <Avatar
-        uid={user!.id}
+        uid={user?.id || ''}
         url={avatar_url}
         size={150}
         onUpload={(url) => {

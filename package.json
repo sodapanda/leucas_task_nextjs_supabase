@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "gen":"next build && next export",
     "build": "next build",
     "analyze": "ANALYZE=true next build",
     "start": "next start",
