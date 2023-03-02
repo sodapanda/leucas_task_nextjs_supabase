@@ -203,7 +203,9 @@ export default function Clock() {
     <div className="w-full">
       <div className="w-full flex flex-row items-center justify-around bg-blue-50">
         <h4>{formattedDate}</h4>
-        <Text>今日总时长{todayDuration}</Text>
+        <Text c="blue" fz="lg" fw={700}>
+          {todayDuration}
+        </Text>
 
         {showGenBtn && (
           <ActionIcon color="blue" variant="filled" onClick={handleSelectTasks}>
@@ -214,50 +216,57 @@ export default function Clock() {
 
       {selectedTasks.length > 0 &&
         selectedTasks.map((task) => (
-          <div key={task.id} className="flex flex-row justify-between mb-2">
-            <Text className="ml-2">
-              {task.task_category} {task.task_name}
+          <div key={task.id} className="flex flex-col mb-2">
+            <Text fw={500} className="ml-2">
+              {task.task_category}
             </Text>
-            <Text>{task.duration}</Text>
-            {task.status === statusStoped && (
-              <ActionIcon
-                className="mr-2"
-                color="blue"
-                variant="filled"
-                onClick={() => {
-                  console.log('start');
-                  timerClick(task.id, actionClickRun);
-                }}
-              >
-                <IconPlayerPlay size={18} />
-              </ActionIcon>
-            )}
-            {task.status === statusRuning && (
-              <ActionIcon
-                className="mr-2"
-                color="blue"
-                variant="filled"
-                onClick={() => {
-                  console.log('start');
-                  timerClick(task.id, actionClickStop);
-                }}
-              >
-                <IconPlayerPause size={18} />
-              </ActionIcon>
-            )}
-            {task.status === statusDisabled && (
-              <ActionIcon
-                disabled
-                className="mr-2"
-                color="blue"
-                variant="filled"
-                onClick={() => {
-                  console.log('start');
-                }}
-              >
-                <IconPlayerPlay size={18} />
-              </ActionIcon>
-            )}
+            <Text className="ml-2" size="sm">
+              {task.task_name}
+            </Text>
+            <div className="flex flex-row  justify-between items-center mt-2 bg-blue-50">
+              <Text fw={700} c="blue" className="ml-2">
+                {task.duration}
+              </Text>
+              {task.status === statusStoped && (
+                <ActionIcon
+                  className="mr-2"
+                  color="blue"
+                  variant="filled"
+                  onClick={() => {
+                    console.log('start');
+                    timerClick(task.id, actionClickRun);
+                  }}
+                >
+                  <IconPlayerPlay size={18} />
+                </ActionIcon>
+              )}
+              {task.status === statusRuning && (
+                <ActionIcon
+                  className="mr-2"
+                  color="blue"
+                  variant="filled"
+                  onClick={() => {
+                    console.log('start');
+                    timerClick(task.id, actionClickStop);
+                  }}
+                >
+                  <IconPlayerPause size={18} />
+                </ActionIcon>
+              )}
+              {task.status === statusDisabled && (
+                <ActionIcon
+                  disabled
+                  className="mr-2"
+                  color="blue"
+                  variant="filled"
+                  onClick={() => {
+                    console.log('start');
+                  }}
+                >
+                  <IconPlayerPlay size={18} />
+                </ActionIcon>
+              )}
+            </div>
           </div>
         ))}
     </div>
