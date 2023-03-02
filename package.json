@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "gen":"next build && next export",
+    "gen": "next build && next export",
     "build": "next build",
     "analyze": "ANALYZE=true next build",
     "start": "next start",
@@ -41,7 +41,8 @@
     "hh-mm-ss": "^1.2.0",
     "next": "13.1.6",
     "react": "18.2.0",
-    "react-dom": "18.2.0"
+    "react-dom": "18.2.0",
+    "react-timer-hook": "^3.0.5"
   },
   "devDependencies": {
     "@babel/core": "^7.21.0",

@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { ActionIcon, Text } from '@mantine/core';
 import { format } from 'date-fns';
 import { useSupabaseClient, useUser } from '@supabase/auth-helpers-react';
-import { useInterval } from '@mantine/hooks';
+import { useStopwatch } from 'react-timer-hook';
+
 import {
   IconBrandVolkswagen,
   IconRefreshDot,
@@ -25,6 +26,8 @@ export default function Clock() {
   const [showGenBtn, setShowGenBtn] = useState(false);
   const formattedDate = format(new Date(), 'yyyy/MM/dd');
 
+  const { seconds, isRunning, start, pause } = useStopwatch({ autoStart: false });
+
   useEffect(() => {
     getHistory();
     supabase
@@ -38,11 +41,13 @@ export default function Clock() {
       });
 
     return () => {
-      intv.stop();
+      if (isRunning) {
+        pause();
+      }
     };
   }, []);
 
-  const intv = useInterval(() => {
+  useEffect(() => {
     setSelectedTasks((tasks) => {
       const cTasks = tasks.slice();
       const target = cTasks.find((task) => task.status === statusRuning);
@@ -71,7 +76,7 @@ export default function Clock() {
       }
       return cTasks;
     });
-  }, 1000);
+  }, [seconds]);
 
   useEffect(() => {
     // console.log(selectedTasks);
@@ -162,10 +167,10 @@ export default function Clock() {
     if (target) {
       if (action === actionClickRun) {
         target.status = statusRuning;
-        intv.start();
+        start();
       } else if (action === actionClickStop) {
         target.status = statusStoped;
-        intv.stop();
+        pause();
       }
     }
 
