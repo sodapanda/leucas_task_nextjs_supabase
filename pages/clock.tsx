@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ActionIcon, Text } from '@mantine/core';
 import { format } from 'date-fns';
 import { useSupabaseClient, useUser } from '@supabase/auth-helpers-react';
@@ -25,8 +25,11 @@ export default function Clock() {
   const [todayDuration, setDuration] = useState('00:00:00');
   const [showGenBtn, setShowGenBtn] = useState(false);
   const formattedDate = format(new Date(), 'yyyy/MM/dd');
+  const tickCount = useRef(0);
 
-  const { seconds, isRunning, start, pause } = useStopwatch({ autoStart: false });
+  const { days, hours, minutes, seconds, isRunning, start, pause, reset } = useStopwatch({
+    autoStart: false,
+  });
 
   useEffect(() => {
     getHistory();
@@ -48,11 +51,14 @@ export default function Clock() {
   }, []);
 
   useEffect(() => {
+    tickCount.current = tickCount.current + 1;
     setSelectedTasks((tasks) => {
       const cTasks = tasks.slice();
       const target = cTasks.find((task) => task.status === statusRuning);
       if (target) {
-        target.duration = TimeFormat.fromS(TimeFormat.toS(target.duration) + 1, 'hh:mm:ss');
+        const runDuration = hours * 3600 + minutes * 60 + seconds;
+        const currentDuration = target.clickDuration + runDuration;
+        target.duration = TimeFormat.fromS(currentDuration, 'hh:mm:ss');
 
         let totalS = 0;
         for (const task of cTasks) {
@@ -60,10 +66,12 @@ export default function Clock() {
         }
         setDuration(TimeFormat.fromS(totalS, 'hh:mm:ss'));
 
-        if (totalS % 60 === 0) {
+        if (tickCount.current >= 10) {
+          tickCount.current = 0;
           const deepCopiedTaskList = JSON.parse(JSON.stringify(cTasks)) as any[];
           deepCopiedTaskList.map((item) => {
             item.status = undefined;
+            item.clickDuration = undefined;
             return item;
           });
           supabase
@@ -167,7 +175,8 @@ export default function Clock() {
     if (target) {
       if (action === actionClickRun) {
         target.status = statusRuning;
-        start();
+        target.clickDuration = TimeFormat.toS(target.duration);
+        reset();
       } else if (action === actionClickStop) {
         target.status = statusStoped;
         pause();
