@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, MutableRefObject } from 'react';
 import { ActionIcon, Text } from '@mantine/core';
 import { format } from 'date-fns';
 import { useSupabaseClient, useUser } from '@supabase/auth-helpers-react';
@@ -26,12 +26,14 @@ export default function Clock() {
   const [showGenBtn, setShowGenBtn] = useState(false);
   const formattedDate = format(new Date(), 'yyyy/MM/dd');
   const tickCount = useRef(0);
+  const audioRef = useRef<any>();
 
   const { days, hours, minutes, seconds, isRunning, start, pause, reset } = useStopwatch({
     autoStart: false,
   });
 
   useEffect(() => {
+    audioRef.current = new Audio('/audio.wav');
     getHistory();
     supabase
       .from('daily_product_count')
@@ -52,6 +54,7 @@ export default function Clock() {
 
   useEffect(() => {
     tickCount.current = tickCount.current + 1;
+
     setSelectedTasks((tasks) => {
       const cTasks = tasks.slice();
       const target = cTasks.find((task) => task.status === statusRuning);
@@ -80,6 +83,8 @@ export default function Clock() {
             .then((res) => {
               console.log(res);
             });
+
+          audioRef.current?.play();
         }
       }
       return cTasks;
@@ -216,14 +221,14 @@ export default function Clock() {
 
       {selectedTasks.length > 0 &&
         selectedTasks.map((task) => (
-          <div key={task.id} className="flex flex-col mb-2">
+          <div key={task.id} className="flex flex-col mb-4 mt-2">
             <Text fw={500} className="ml-2">
               {task.task_category}
             </Text>
             <Text className="ml-2" size="sm">
               {task.task_name}
             </Text>
-            <div className="flex flex-row  justify-between items-center mt-2 bg-blue-50">
+            <div className="flex flex-row  justify-between items-center mt-1 bg-blue-50">
               <Text fw={700} c="blue" className="ml-2">
                 {task.duration}
               </Text>
@@ -235,6 +240,7 @@ export default function Clock() {
                   onClick={() => {
                     console.log('start');
                     timerClick(task.id, actionClickRun);
+                    audioRef.current?.play();
                   }}
                 >
                   <IconPlayerPlay size={18} />
