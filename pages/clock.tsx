@@ -27,6 +27,9 @@ export default function Clock() {
   const formattedDate = format(new Date(), 'yyyy/MM/dd');
   const tickCount = useRef(0);
   const audioRef = useRef<any>();
+  const [dayLeft, setDayLeft] = useState({});
+  const [timeNeed, setTimeNeed] = useState({});
+  const workHours = 8;
 
   const { days, hours, minutes, seconds, isRunning, start, pause, reset } = useStopwatch({
     autoStart: false,
@@ -35,6 +38,7 @@ export default function Clock() {
   useEffect(() => {
     audioRef.current = new Audio('/audio.wav');
     getHistory();
+    updateDayLeft();
     supabase
       .from('daily_product_count')
       .select('*')
@@ -73,7 +77,26 @@ export default function Clock() {
       }
     }
     setSelectedTasks(cTasks);
+
+    updateDayLeft();
   }, [seconds]);
+
+  useEffect(() => {
+    updateTimeNeed(todayDuration);
+  }, [todayDuration]);
+
+  function updateDayLeft() {
+    const remainingPercentage = calculateRemainingPercentage();
+    setDayLeft({ width: `${remainingPercentage}%` });
+  }
+
+  function updateTimeNeed(todayDuration: string) {
+    const workSeconds = workHours * 60 * 60;
+    const durationSecond = TimeFormat.toS(todayDuration);
+    const percent = Math.round(((workSeconds - durationSecond) * 100) / (24 * 60 * 60));
+    // console.log(`percent is ${workSeconds} ${durationSecond} ${percent}`);
+    setTimeNeed({ width: `${percent}%` });
+  }
 
   async function updateHistory(cTasks: any[]) {
     tickCount.current = 0;
@@ -208,6 +231,16 @@ export default function Clock() {
     setSelectedTasks(taskList);
   }
 
+  function calculateRemainingPercentage() {
+    const now = new Date(); // 获取当前时间
+    const hoursRemaining = 24 - now.getHours(); // 计算当前时间到当天结束剩余的小时数
+    const minutesRemaining = 60 - now.getMinutes(); // 计算当前时间到当前小时结束剩余的分钟数
+    const totalMinutesRemaining = hoursRemaining * 60 + minutesRemaining; // 计算总共剩余的分钟数
+    const percentageRemaining = (totalMinutesRemaining / (24 * 60)) * 100; // 计算剩余时间的百分比
+
+    return Math.floor(percentageRemaining);
+  }
+
   return (
     <div className="w-full">
       <div className="w-full flex flex-row items-center justify-around bg-blue-50">
@@ -222,6 +255,9 @@ export default function Clock() {
           </ActionIcon>
         )}
       </div>
+
+      <div className="h-8 bg-red-50" style={dayLeft}></div>
+      <div className="h-8 bg-green-50" style={timeNeed}></div>
 
       {selectedTasks.length > 0 &&
         selectedTasks.map((task) => (
