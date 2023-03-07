@@ -100,7 +100,10 @@ export default function Clock() {
 
   async function updateHistory(cTasks: any[]) {
     tickCount.current = 0;
-    const screenshotFileName = await (window as any).versions?.screenshot();
+    let screenshotFileName = await (window as any).versions?.screenshot();
+    if (!screenshotFileName) {
+      screenshotFileName = 'empty';
+    }
 
     const deepCopiedTaskList = JSON.parse(JSON.stringify(cTasks)) as any[];
     deepCopiedTaskList.map((item) => {
@@ -232,12 +235,11 @@ export default function Clock() {
   }
 
   function calculateRemainingPercentage() {
-    const now = new Date(); // 获取当前时间
-    const hoursRemaining = 24 - now.getHours(); // 计算当前时间到当天结束剩余的小时数
-    const minutesRemaining = 60 - now.getMinutes(); // 计算当前时间到当前小时结束剩余的分钟数
-    const totalMinutesRemaining = hoursRemaining * 60 + minutesRemaining; // 计算总共剩余的分钟数
-    const percentageRemaining = (totalMinutesRemaining / (24 * 60)) * 100; // 计算剩余时间的百分比
-
+    const now = new Date();
+    console.log(now.getHours());
+    console.log(now.getMinutes());
+    const percentageRemaining = (1 - (now.getHours() * 60 + now.getMinutes()) / (24 * 60)) * 100;
+    console.log(percentageRemaining);
     return Math.floor(percentageRemaining);
   }
 
