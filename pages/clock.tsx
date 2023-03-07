@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, MutableRefObject } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ActionIcon, Text } from '@mantine/core';
 import { format } from 'date-fns';
 import { useSupabaseClient, useUser } from '@supabase/auth-helpers-react';
@@ -55,41 +55,56 @@ export default function Clock() {
   useEffect(() => {
     tickCount.current = tickCount.current + 1;
 
-    setSelectedTasks((tasks) => {
-      const cTasks = tasks.slice();
-      const target = cTasks.find((task) => task.status === statusRuning);
-      if (target) {
-        const runDuration = hours * 3600 + minutes * 60 + seconds;
-        const currentDuration = target.clickDuration + runDuration;
-        target.duration = TimeFormat.fromS(currentDuration, 'hh:mm:ss');
+    const cTasks = selectedTasks.slice();
+    const target = cTasks.find((task) => task.status === statusRuning);
+    if (target) {
+      const runDuration = hours * 3600 + minutes * 60 + seconds;
+      const currentDuration = target.clickDuration + runDuration;
+      target.duration = TimeFormat.fromS(currentDuration, 'hh:mm:ss');
 
-        let totalS = 0;
-        for (const task of cTasks) {
-          totalS = totalS + TimeFormat.toS(task.duration);
-        }
-        setDuration(TimeFormat.fromS(totalS, 'hh:mm:ss'));
-
-        if (tickCount.current >= 10) {
-          tickCount.current = 0;
-          const deepCopiedTaskList = JSON.parse(JSON.stringify(cTasks)) as any[];
-          deepCopiedTaskList.map((item) => {
-            item.status = undefined;
-            item.clickDuration = undefined;
-            return item;
-          });
-          supabase
-            .from('task_history')
-            .upsert(deepCopiedTaskList, { onConflict: 'id' })
-            .then((res) => {
-              console.log(res);
-            });
-
-          audioRef.current?.play();
-        }
+      let totalS = 0;
+      for (const task of cTasks) {
+        totalS = totalS + TimeFormat.toS(task.duration);
       }
-      return cTasks;
-    });
+      setDuration(TimeFormat.fromS(totalS, 'hh:mm:ss'));
+
+      if (tickCount.current >= 10) {
+        updateHistory(cTasks);
+      }
+    }
+    setSelectedTasks(cTasks);
   }, [seconds]);
+
+  async function updateHistory(cTasks: any[]) {
+    tickCount.current = 0;
+    const screenshotFileName = await (window as any).versions?.screenshot();
+    console.log(screenshotFileName);
+
+    const deepCopiedTaskList = JSON.parse(JSON.stringify(cTasks)) as any[];
+    deepCopiedTaskList.map((item) => {
+      item.status = undefined;
+      item.clickDuration = undefined;
+      return item;
+    });
+
+    const screenShotDbRst = await supabase.from('screen_shot').insert([
+      {
+        date: formattedDate,
+        file_name: screenshotFileName,
+        user_id: user?.id,
+      },
+    ]);
+
+    console.log(screenShotDbRst);
+
+    const supabaseRst = await supabase
+      .from('task_history')
+      .upsert(deepCopiedTaskList, { onConflict: 'id' });
+
+    console.log(supabaseRst);
+
+    audioRef.current?.play();
+  }
 
   useEffect(() => {
     // console.log(selectedTasks);
