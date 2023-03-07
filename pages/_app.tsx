@@ -41,7 +41,7 @@ export default function App({
           <MantineProvider theme={{ colorScheme }} withGlobalStyles withNormalizeCSS>
             <NotificationsProvider>
               <div className="w-screen">
-                <div className="w-full sm:w-96 ml-auto mr-auto flex flex-col">
+                <div className="w-full ml-auto mr-auto flex flex-col">
                   <Tabs
                     variant="outline"
                     radius="lg"

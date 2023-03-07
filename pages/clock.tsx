@@ -78,7 +78,6 @@ export default function Clock() {
   async function updateHistory(cTasks: any[]) {
     tickCount.current = 0;
     const screenshotFileName = await (window as any).versions?.screenshot();
-    console.log(screenshotFileName);
 
     const deepCopiedTaskList = JSON.parse(JSON.stringify(cTasks)) as any[];
     deepCopiedTaskList.map((item) => {
@@ -87,7 +86,7 @@ export default function Clock() {
       return item;
     });
 
-    const screenShotDbRst = await supabase.from('screen_shot').insert([
+    await supabase.from('screen_shot').insert([
       {
         date: formattedDate,
         file_name: screenshotFileName,
@@ -95,19 +94,12 @@ export default function Clock() {
       },
     ]);
 
-    console.log(screenShotDbRst);
-
-    const supabaseRst = await supabase
-      .from('task_history')
-      .upsert(deepCopiedTaskList, { onConflict: 'id' });
-
-    console.log(supabaseRst);
+    await supabase.from('task_history').upsert(deepCopiedTaskList, { onConflict: 'id' });
 
     audioRef.current?.play();
   }
 
   useEffect(() => {
-    // console.log(selectedTasks);
     if (selectedTasks && selectedTasks.length > 0) {
       setShowGenBtn(false);
     } else {
@@ -126,7 +118,6 @@ export default function Clock() {
             item.status = 'stoped';
             return item;
           });
-          // console.log(data);
           setSelectedTasks(data);
         }
       });
@@ -146,10 +137,8 @@ export default function Clock() {
       return;
     }
     data.map((item) => (item.status = 'stoped'));
-    // console.log(JSON.stringify(data));
 
     shuffleArray(data);
-    // console.log(JSON.stringify(data));
     // 复制一份原始任务数组
     const availableTasks = data.slice();
     const selectedTasks: any[] = [];

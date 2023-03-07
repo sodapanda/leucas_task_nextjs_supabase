@@ -1,12 +1,13 @@
-import { useSupabaseClient, useUser } from '@supabase/auth-helpers-react';
+import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import { useState, useEffect } from 'react';
 import { ActionIcon, Text } from '@mantine/core';
+import { useRouter } from 'next/router';
 
 const TimeFormat = require('hh-mm-ss');
 
 export default function History() {
   const supabase = useSupabaseClient();
-  const user = useUser();
+  const router = useRouter();
 
   const [historyList, setHistory] = useState<any>([]);
 
@@ -32,6 +33,9 @@ export default function History() {
       {historyList.map((historyItem: any) => {
         return (
           <div
+            onClick={() => {
+              router.push(`/screenshot?historyDate=${historyItem.task_date}`);
+            }}
             key={historyItem.task_date}
             className="flex flex-row justify-between items-center mt-2 mb-2"
           >
