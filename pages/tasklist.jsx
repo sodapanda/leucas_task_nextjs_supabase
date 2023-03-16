@@ -45,7 +45,10 @@ export default function TaskList() {
   }
 
   async function updateTaskList() {
-    const { data: taskListd, error } = await supabase.from('tasks').select('*');
+    const { data: taskListd, error } = await supabase
+      .from('tasks')
+      .select('*')
+      .order('id', { ascending: false });
     console.log(taskListd);
     if (!error && taskListd) {
       const segment = taskListd.reduce((acc, cur) => {

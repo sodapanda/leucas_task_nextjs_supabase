@@ -15,6 +15,7 @@ export default function History() {
     supabase
       .from('daily_product_count')
       .select('*')
+      .order('task_date', { ascending: false })
       .then((rst) => {
         rst.data?.map((historyItem) => {
           const totalCountSeconds = TimeFormat.toS(historyItem.total_count);
