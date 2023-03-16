@@ -7,10 +7,14 @@ import {
   Group,
   Checkbox,
   Box,
+  Card,
+  Flex,
+  Modal,
   Divider,
 } from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks';
 import { ActionIcon } from '@mantine/core';
-import { IconTrash } from '@tabler/icons';
+import { IconTrash, IconPencil } from '@tabler/icons';
 import { useState, useEffect } from 'react';
 import { useUser, useSupabaseClient } from '@supabase/auth-helpers-react';
 
@@ -24,6 +28,8 @@ export default function TaskList() {
   const [addTaskName, setAddTaskName] = useState('');
   const [rank, setRank] = useState(5);
   const [taskList, setTaskList] = useState([]);
+  const [opened, { open, close }] = useDisclosure(false);
+  const [inEditTask, setInEditTask] = useState({});
 
   useEffect(() => {
     updateTaskTypeList();
@@ -68,119 +74,175 @@ export default function TaskList() {
   }
 
   return (
-    <div className="w-ful mt-4">
-      {taskTypeList.map((typeItem) => (
-        <Group key={typeItem.id} mb="xs" ml="xs">
-          <ActionIcon
-            color="blue"
-            radius="xl"
+    <>
+      <Modal opened={opened} onClose={close}>
+        <Card shadow="sm" padding="lg" radius="md" withBorder>
+          <TextInput
+            value={inEditTask.power}
+            onChange={async (event) => {
+              const newPower = event.currentTarget.value;
+              setInEditTask({ ...inEditTask, power: newPower });
+            }}
+          />
+          <Button
             variant="light"
+            color="blue"
+            fullWidth
+            mt="md"
+            radius="md"
+            onClick={async () => {
+              await supabase
+                .from('tasks')
+                .update({ power: inEditTask.power })
+                .eq('id', inEditTask.id);
+              updateTaskList();
+              close();
+            }}
+          >
+            save
+          </Button>
+        </Card>
+      </Modal>
+      <div className="w-ful mt-4">
+        {taskTypeList.map((typeItem) => (
+          <Group key={typeItem.id} mb="xs" ml="xs">
+            <ActionIcon
+              color="blue"
+              radius="xl"
+              variant="light"
+              onClick={async () => {
+                const { data, error } = await supabase
+                  .from('tasktype')
+                  .delete()
+                  .eq('id', typeItem.id);
+                if (error) {
+                  alert(`${error.message}`);
+                }
+                updateTaskTypeList();
+              }}
+            >
+              <IconTrash size="1.125rem" />
+            </ActionIcon>
+            <Text fz="sm">{typeItem.tasktypename}</Text>
+          </Group>
+        ))}
+        <TextInput
+          placeholder="添加任务类型"
+          value={addTaskType}
+          onChange={(event) => {
+            setAddTaskType(event.currentTarget.value);
+          }}
+        />
+
+        <Flex mt="xs" gap="sm" justify="flex-end" align="center" direction="row" wrap="nowrap">
+          <Button
+            disabled={!addTaskType}
             onClick={async () => {
               const { data, error } = await supabase
                 .from('tasktype')
-                .delete()
-                .eq('id', typeItem.id);
+                .insert([{ tasktypename: addTaskType, user_id: user.id }]);
               if (error) {
-                alert(`${error.message}`);
+                alert(error.message);
               }
+              setAddTaskType('');
               updateTaskTypeList();
             }}
           >
-            <IconTrash size="1.125rem" />
-          </ActionIcon>
-          <Text fz="sm">{typeItem.tasktypename}</Text>
-        </Group>
-      ))}
-      <TextInput
-        placeholder="添加任务类型"
-        value={addTaskType}
-        onChange={(event) => {
-          setAddTaskType(event.currentTarget.value);
-        }}
-      />
-      <Button
-        disabled={!addTaskType}
-        onClick={async () => {
-          const { data, error } = await supabase
-            .from('tasktype')
-            .insert([{ tasktypename: addTaskType, user_id: user.id }]);
-          if (error) {
-            alert(error.message);
-          }
-          setAddTaskType('');
-          updateTaskTypeList();
-        }}
-      >
-        add
-      </Button>
-      <Divider my="sm" variant="dashed" />
+            add
+          </Button>
+        </Flex>
+        <Divider my="sm" variant="dashed" />
 
-      <Select
-        label="选择任务类型"
-        value={selectedTaskType}
-        data={taskTypeList}
-        onChange={setSelectedTaskType}
-      />
-      <TextInput
-        label="任务"
-        value={addTaskName}
-        onChange={(event) => {
-          setAddTaskName(event.currentTarget.value);
-        }}
-      />
-      <NumberInput label="优先级" value={rank} onChange={setRank} />
-      <Button
-        disabled={!selectedTaskType || !addTaskName}
-        onClick={async () => {
-          await supabase.from('tasks').insert([
-            {
-              power: rank,
-              task_name: addTaskName,
-              user_id: user.id,
-              tasktype: selectedTaskType,
-            },
-          ]);
+        <Select
+          label="选择任务类型"
+          value={selectedTaskType}
+          data={taskTypeList}
+          onChange={setSelectedTaskType}
+        />
+        <TextInput
+          label="任务"
+          value={addTaskName}
+          onChange={(event) => {
+            setAddTaskName(event.currentTarget.value);
+          }}
+        />
+        <NumberInput label="优先级" value={rank} onChange={setRank} />
+        <Flex mt="xs" gap="sm" justify="flex-end" align="center" direction="row" wrap="nowrap">
+          <Button
+            disabled={!selectedTaskType || !addTaskName}
+            onClick={async () => {
+              await supabase.from('tasks').insert([
+                {
+                  power: rank,
+                  task_name: addTaskName,
+                  user_id: user.id,
+                  tasktype: selectedTaskType,
+                },
+              ]);
 
-          setSelectedTaskType('');
-          setAddTaskName('');
-          updateTaskList();
-        }}
-      >
-        add
-      </Button>
+              setSelectedTaskType('');
+              setAddTaskName('');
+              updateTaskList();
+            }}
+          >
+            add
+          </Button>
+        </Flex>
 
-      <Divider my="sm" variant="dashed" />
+        <Divider my="sm" variant="dashed" />
 
-      {taskList.map((taskTypeItem) => (
-        <Box component="div" key={taskTypeItem.tasktype}>
-          <Text>{taskTypeItem.tasktype}</Text>
-          {taskTypeItem.list.map((task) => (
-            <Group key={task.id} position="apart" mt="xs" mx="xs">
-              <Checkbox
-                label={task.task_name}
-                checked={task.active}
-                onChange={async (event) => {
-                  const flag = event.currentTarget.checked;
-                  console.log(`task id ${task.id} checked ${flag}`);
-                  await supabase.from('tasks').update({ active: flag }).eq('id', task.id);
-                  updateTaskList();
-                }}
-              />
-              <ActionIcon
-                color="blue"
-                radius="xl"
-                variant="light"
-                onClick={async () => {
-                  await supabase.from('tasks').delete().eq('id', task.id);
-                  updateTaskList();
-                }}
-              >
-                <IconTrash size="1.125rem" />
-              </ActionIcon>
-            </Group>
-          ))}
-        </Box>
-      ))}
-    </div>
+        {taskList.map((taskTypeItem) => (
+          <Box component="div" key={taskTypeItem.tasktype}>
+            <Text mt="sm" fz="lg" fw={500} c="dimmed">
+              {taskTypeItem.tasktype}
+            </Text>
+            {taskTypeItem.list.map((task) => (
+              <Group key={task.id} position="apart" mx="xs">
+                <Flex gap="sm" justify="flex-start" align="center" direction="row" wrap="nowrap">
+                  <Checkbox
+                    label={task.task_name}
+                    checked={task.active}
+                    onChange={async (event) => {
+                      const flag = event.currentTarget.checked;
+                      console.log(`task id ${task.id} checked ${flag}`);
+                      await supabase.from('tasks').update({ active: flag }).eq('id', task.id);
+                      updateTaskList();
+                    }}
+                  />
+                  <Text fz="sm" fw={700} c="dimmed">
+                    {task.power}
+                  </Text>
+                </Flex>
+
+                <Flex gap="sm" justify="flex-start" align="center" direction="row" wrap="nowrap">
+                  <ActionIcon
+                    color="blue"
+                    radius="xl"
+                    variant="light"
+                    onClick={() => {
+                      setInEditTask({ ...task });
+                      open();
+                    }}
+                  >
+                    <IconPencil size="1.125rem" />
+                  </ActionIcon>
+                  <ActionIcon
+                    color="blue"
+                    radius="xl"
+                    variant="light"
+                    onClick={async () => {
+                      await supabase.from('tasks').delete().eq('id', task.id);
+                      updateTaskList();
+                    }}
+                  >
+                    <IconTrash size="1.125rem" />
+                  </ActionIcon>
+                </Flex>
+              </Group>
+            ))}
+          </Box>
+        ))}
+      </div>
+    </>
   );
 }
