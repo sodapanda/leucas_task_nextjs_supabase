@@ -66,6 +66,28 @@ export default function TaskList() {
 
   return (
     <div className="w-ful mt-4">
+      {taskTypeList.map((typeItem) => (
+        <Group key={typeItem.id} mb="xs" ml="xs">
+          <ActionIcon
+            color="blue"
+            radius="xl"
+            variant="light"
+            onClick={async () => {
+              const { data, error } = await supabase
+                .from('tasktype')
+                .delete()
+                .eq('id', typeItem.id);
+              if (error) {
+                alert(`${error.message}`);
+              }
+              updateTaskTypeList();
+            }}
+          >
+            <IconTrash size="1.125rem" />
+          </ActionIcon>
+          <Text fz="sm">{typeItem.tasktypename}</Text>
+        </Group>
+      ))}
       <TextInput
         placeholder="添加任务类型"
         value={addTaskType}
