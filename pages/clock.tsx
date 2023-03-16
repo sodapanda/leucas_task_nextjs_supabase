@@ -36,7 +36,7 @@ export default function Clock() {
   });
 
   useEffect(() => {
-    audioRef.current = new Audio('/audio.wav');
+    audioRef.current = new Audio('/interface-soft-abbreviated-click-131438.mp3');
     getHistory();
     updateDayLeft();
     supabase
