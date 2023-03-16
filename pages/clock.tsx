@@ -157,7 +157,7 @@ export default function Clock() {
   }
 
   async function handleSelectTasks() {
-    let { data, error } = await supabase.from('tasks').select('*');
+    let { data, error } = await supabase.from('tasks').select('*').eq('active', true);
     if (error || !data || data.length == 0) {
       console.log('no data');
       return;
@@ -189,7 +189,7 @@ export default function Clock() {
       taskList.push({
         task_date: formattedDate,
         task_id: taskItem.id,
-        task_category: taskItem.category_name,
+        task_category: taskItem.tasktype,
         task_name: taskItem.task_name,
         duration: '00:00:00',
         user_id: user?.id,

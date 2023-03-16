@@ -53,7 +53,7 @@ export default function App({
                   >
                     <Tabs.List>
                       <Tabs.Tab value="/clock">打卡</Tabs.Tab>
-                      <Tabs.Tab value="/taskcategory">任务分类</Tabs.Tab>
+                      <Tabs.Tab value="/tasklist">任务</Tabs.Tab>
                       <Tabs.Tab value="/history">历史</Tabs.Tab>
                       <Tabs.Tab value="/account">个人</Tabs.Tab>
                     </Tabs.List>
