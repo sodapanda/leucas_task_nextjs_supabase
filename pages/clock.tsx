@@ -236,10 +236,7 @@ export default function Clock() {
 
   function calculateRemainingPercentage() {
     const now = new Date();
-    console.log(now.getHours());
-    console.log(now.getMinutes());
     const percentageRemaining = (1 - (now.getHours() * 60 + now.getMinutes()) / (24 * 60)) * 100;
-    console.log(percentageRemaining);
     return Math.floor(percentageRemaining);
   }
 
@@ -264,10 +261,10 @@ export default function Clock() {
       {selectedTasks.length > 0 &&
         selectedTasks.map((task) => (
           <div key={task.id} className="flex flex-col mb-4 mt-2">
-            <Text fw={500} className="ml-2">
+            <Text size="xs" className="ml-2">
               {task.task_category}
             </Text>
-            <Text className="ml-2" size="sm">
+            <Text className="ml-2" fw={500}>
               {task.task_name}
             </Text>
             <div className="flex flex-row  justify-between items-center mt-1 bg-blue-50">
