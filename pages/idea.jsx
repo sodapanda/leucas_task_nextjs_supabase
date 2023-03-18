@@ -144,11 +144,10 @@ export default function Idea() {
           </Modal>
           <ScrollArea sx={{ height: `${height - 100}px` }}>
             {roleList.map((role) => (
-              <>
+              <Box component="div" key={role.id}>
                 <Text
                   mx="xs"
                   fz="sm"
-                  key={role.id}
                   style={{
                     backgroundColor:
                       selectedRole && selectedRole.id === role.id
@@ -164,7 +163,7 @@ export default function Idea() {
                   {role.role_name}
                 </Text>
                 <Divider my="xs" variant="dashed"></Divider>
-              </>
+              </Box>
             ))}
           </ScrollArea>
         </Stack>
@@ -197,11 +196,10 @@ export default function Idea() {
           </Modal>
           <ScrollArea sx={{ height: `${height - 100}px` }}>
             {troubleList.map((trouble) => (
-              <>
+              <Box component="div" key={trouble.id}>
                 <Text
                   mx="xs"
                   fz="sm"
-                  key={trouble.id}
                   style={{
                     backgroundColor:
                       selectedTrouble && selectedTrouble.id === trouble.id
@@ -216,7 +214,7 @@ export default function Idea() {
                   {trouble.trouble_name}
                 </Text>
                 <Divider my="xs" variant="dashed"></Divider>
-              </>
+              </Box>
             ))}
           </ScrollArea>
         </Stack>
@@ -245,11 +243,10 @@ export default function Idea() {
           </Modal>
           <ScrollArea sx={{ height: `${height - 100}px` }}>
             {superPowerList.map((superpower) => (
-              <>
+              <Box component="div" key={superpower.id}>
                 <Text
                   mx="xs"
                   fz="sm"
-                  key={superpower.id}
                   style={{
                     backgroundColor:
                       selectedSuperPower && selectedSuperPower.id === superpower.id
@@ -264,7 +261,7 @@ export default function Idea() {
                   {superpower.superpower_name}
                 </Text>
                 <Divider my="xs" variant="dashed"></Divider>
-              </>
+              </Box>
             ))}
           </ScrollArea>
         </Stack>
@@ -334,7 +331,7 @@ export default function Idea() {
       </Flex>
       <ScrollArea className="bg-teal-50	" sx={{ height: `${height - 40}px` }}>
         {ideaList.map((idea) => (
-          <Box component="div" className="w-full">
+          <Box component="div" className="w-full" key={idea.id}>
             <Divider my="sm" variant="dashed" />
             <Group>
               <ActionIcon
@@ -347,7 +344,7 @@ export default function Idea() {
                   setOpenIdeaDetailModal(true);
                 }}
               >
-                <IconDots size="1.125rem" />
+                <IconDots size="1rem" />
               </ActionIcon>
               <Text
                 fz="sm"

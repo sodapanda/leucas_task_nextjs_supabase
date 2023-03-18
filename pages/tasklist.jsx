@@ -129,7 +129,7 @@ export default function TaskList() {
                 updateTaskTypeList();
               }}
             >
-              <IconTrash size="1.125rem" />
+              <IconTrash size="1rem" />
             </ActionIcon>
             <Text fz="sm">{typeItem.tasktypename}</Text>
           </Group>
@@ -207,48 +207,43 @@ export default function TaskList() {
             </Text>
             {taskTypeItem.list.map((task) => (
               <Box component="div" key={task.id}>
-                <Group position="apart" mx="xs">
-                  <Flex gap="sm" justify="flex-start" align="center" direction="row" wrap="nowrap">
-                    <Checkbox
-                      label={task.task_name}
-                      checked={task.active}
-                      onChange={async (event) => {
-                        const flag = event.currentTarget.checked;
-                        console.log(`task id ${task.id} checked ${flag}`);
-                        await supabase.from('tasks').update({ active: flag }).eq('id', task.id);
-                        updateTaskList();
-                      }}
-                    />
-                    <Text fz="sm" fw={700} c="dimmed">
-                      {task.power}
-                    </Text>
-                  </Flex>
-
-                  <Flex gap="sm" justify="flex-start" align="center" direction="row" wrap="nowrap">
-                    <ActionIcon
-                      color="blue"
-                      radius="xl"
-                      variant="light"
-                      onClick={() => {
-                        setInEditTask({ ...task });
-                        open();
-                      }}
-                    >
-                      <IconPencil size="1.125rem" />
-                    </ActionIcon>
-                    <ActionIcon
-                      color="blue"
-                      radius="xl"
-                      variant="light"
-                      onClick={async () => {
-                        await supabase.from('tasks').delete().eq('id', task.id);
-                        updateTaskList();
-                      }}
-                    >
-                      <IconTrash size="1.125rem" />
-                    </ActionIcon>
-                  </Flex>
-                </Group>
+                <Flex justify="flex-start" gap="xs" align="center" direction="row" wrap="nowrap">
+                  <ActionIcon
+                    color="blue"
+                    radius="xl"
+                    variant="light"
+                    onClick={() => {
+                      setInEditTask({ ...task });
+                      open();
+                    }}
+                  >
+                    <IconPencil size="1rem" />
+                  </ActionIcon>
+                  <ActionIcon
+                    color="blue"
+                    radius="xl"
+                    variant="light"
+                    onClick={async () => {
+                      await supabase.from('tasks').delete().eq('id', task.id);
+                      updateTaskList();
+                    }}
+                  >
+                    <IconTrash size="1rem" />
+                  </ActionIcon>
+                  <Text fz="sm" fw={700} c="blue">
+                    {task.power}
+                  </Text>
+                  <Checkbox
+                    label={task.task_name}
+                    checked={task.active}
+                    onChange={async (event) => {
+                      const flag = event.currentTarget.checked;
+                      console.log(`task id ${task.id} checked ${flag}`);
+                      await supabase.from('tasks').update({ active: flag }).eq('id', task.id);
+                      updateTaskList();
+                    }}
+                  />
+                </Flex>
                 <Text fz="xs" c="dimmed" mx="xl" truncate lineClamp={1}>
                   {task.step}
                 </Text>
