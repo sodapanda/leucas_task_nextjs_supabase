@@ -36,13 +36,19 @@ export default function Idea() {
   const [inputAdvantage, setInputAdvantage] = useState('');
   const [inputKeyword, setInputKeyword] = useState('');
 
+  const [ideaList, setIdeaList] = useState([]);
+
   useEffect(() => {
     updateRole();
     updateSuperPower();
+    updateIdeaList();
   }, []);
 
   async function updateRole() {
-    const { data, error } = await supabase.from('role').select('*');
+    const { data, error } = await supabase
+      .from('role')
+      .select('*')
+      .order('id', { ascending: false });
 
     if (error) {
       setRoleList([]);
@@ -53,7 +59,11 @@ export default function Idea() {
 
   async function updateTrouble(role) {
     if (role) {
-      const { data, error } = await supabase.from('trouble').select('*').eq('role_id', role.id);
+      const { data, error } = await supabase
+        .from('trouble')
+        .select('*')
+        .eq('role_id', role.id)
+        .order('id', { ascending: false });
 
       if (error) {
         setTroubleList([]);
@@ -64,12 +74,28 @@ export default function Idea() {
   }
 
   async function updateSuperPower() {
-    const { data, error } = await supabase.from('superpower').select('*');
+    const { data, error } = await supabase
+      .from('superpower')
+      .select('*')
+      .order('id', { ascending: false });
 
     if (error) {
       setSuperPowerList([]);
     } else {
       setSuperPowerList(data);
+    }
+  }
+
+  async function updateIdeaList() {
+    const { data, error } = await supabase
+      .from('idea_view')
+      .select('*')
+      .order('id', { ascending: false });
+
+    if (error) {
+      setIdeaList([]);
+    } else {
+      setIdeaList(data);
     }
   }
 
@@ -80,15 +106,17 @@ export default function Idea() {
           <Button onClick={() => setOpenRoleModal(true)}>add</Button>
           <Modal opened={openRoleModal} onClose={() => setOpenRoleModal(false)}>
             <TextInput
-              label="Role"
-              placeholder="Enter your role here"
+              label="角色"
+              placeholder="...的人 ...的用户 ...爱好者"
               value={inputRole}
               onChange={(event) => setInputRole(event.target.value)}
             />
             <Button
+              disabled={!inputRole}
               onClick={async () => {
                 await supabase.from('role').insert([{ user_id: user.id, role_name: inputRole }]);
                 setOpenRoleModal(false);
+                setInputRole('');
                 updateRole();
               }}
             >
@@ -122,11 +150,12 @@ export default function Idea() {
           <Modal opened={openTroubleModal} onClose={() => setOpenTroubleModal(false)}>
             <TextInput
               label="Trouble"
-              placeholder="Enter your trouble here"
+              placeholder="...很慢 ...很烦 ...很多 ...很难"
               value={inputTrouble}
               onChange={(event) => setInputTrouble(event.target.value)}
             />
             <Button
+              disabled={!inputTrouble}
               onClick={async () => {
                 await supabase
                   .from('trouble')
@@ -135,27 +164,30 @@ export default function Idea() {
                   ]);
                 setOpenTroubleModal(false);
                 updateTrouble(selectedRole);
+                setInputTrouble('');
               }}
             >
               Submit
             </Button>
           </Modal>
-          {troubleList.map((trouble) => (
-            <Text
-              key={trouble.id}
-              style={{
-                backgroundColor:
-                  selectedTrouble && selectedTrouble.id === trouble.id ? 'blue' : 'transparent',
-                cursor: 'pointer',
-                padding: '4px',
-              }}
-              onClick={() => {
-                setSelectedTrouble(trouble);
-              }}
-            >
-              {trouble.trouble_name}
-            </Text>
-          ))}
+          <ScrollArea h={250}>
+            {troubleList.map((trouble) => (
+              <Text
+                key={trouble.id}
+                style={{
+                  backgroundColor:
+                    selectedTrouble && selectedTrouble.id === trouble.id ? 'blue' : 'transparent',
+                  cursor: 'pointer',
+                  padding: '4px',
+                }}
+                onClick={() => {
+                  setSelectedTrouble(trouble);
+                }}
+              >
+                {trouble.trouble_name}
+              </Text>
+            ))}
+          </ScrollArea>
         </Stack>
         <Stack component="div" h="auto">
           <Button onClick={() => setOpenSuperpowerModal(true)}>add</Button>
@@ -167,12 +199,14 @@ export default function Idea() {
               onChange={(event) => setInputSuperPower(event.target.value)}
             />
             <Button
+              disabled={!inputSuperPower}
               onClick={async () => {
                 await supabase
                   .from('superpower')
                   .insert([{ user_id: user.id, superpower_name: inputSuperPower }]);
                 setOpenSuperpowerModal(false);
                 updateSuperPower();
+                setInputSuperPower('');
               }}
             >
               Submit
@@ -241,6 +275,7 @@ export default function Idea() {
                 {
                   user_id: user.id,
                   superpower_id: selectedSuperPower.id,
+                  role_id: selectedRole.id,
                   trouble_id: selectedTrouble.id,
                   idea_name: inputIdeaName,
                   new_insight: inputNewInsight,
@@ -249,12 +284,16 @@ export default function Idea() {
                 },
               ]);
               setOpenIdeaModal(false);
+              updateIdeaList();
             }}
           >
             Submit
           </Button>
         </Modal>
       </Flex>
+      {ideaList.map((idea) => (
+        <Text>{`${idea.role_name} ${idea.trouble_name} ${idea.superpower_name} ${idea.idea_name} ${idea.new_insight} ${idea.advantage} ${idea.keyword}`}</Text>
+      ))}
     </Box>
   );
 }
