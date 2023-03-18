@@ -45,10 +45,23 @@ export default function Idea() {
   const [openIdeaDetailModal, setOpenIdeaDetailModal] = useState(false);
   const [currentIdea, setCurrentIdea] = useState(null);
 
+  const [height, setHeight] = useState(0);
+
   useEffect(() => {
     updateRole();
     updateSuperPower();
     updateIdeaList();
+
+    setHeight(window.innerHeight / 2);
+
+    const handleResize = () => {
+      setHeight(window.innerHeight / 2);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
   }, []);
 
   async function updateRole() {
@@ -107,8 +120,8 @@ export default function Idea() {
   }
   return (
     <Box component="div">
-      <SimpleGrid cols={3} h={300} className="overflow-hidden bg-red-50">
-        <Stack component="div" h="auto">
+      <SimpleGrid cols={3}>
+        <Stack component="div" className="bg-cyan-50">
           <Button onClick={() => setOpenRoleModal(true)}>add</Button>
           <Modal opened={openRoleModal} onClose={() => setOpenRoleModal(false)}>
             <TextInput
@@ -129,27 +142,33 @@ export default function Idea() {
               Submit
             </Button>
           </Modal>
-          <ScrollArea h={250}>
+          <ScrollArea sx={{ height: `${height - 100}px` }}>
             {roleList.map((role) => (
-              <Text
-                key={role.id}
-                style={{
-                  backgroundColor:
-                    selectedRole && selectedRole.id === role.id ? 'blue' : 'transparent',
-                  cursor: 'pointer',
-                  padding: '4px',
-                }}
-                onClick={() => {
-                  setSelectedRole(role);
-                  updateTrouble(role);
-                }}
-              >
-                {role.role_name}
-              </Text>
+              <>
+                <Text
+                  mx="xs"
+                  fz="sm"
+                  key={role.id}
+                  style={{
+                    backgroundColor:
+                      selectedRole && selectedRole.id === role.id
+                        ? 'rgb(6 182 212)'
+                        : 'transparent',
+                    cursor: 'pointer',
+                  }}
+                  onClick={() => {
+                    setSelectedRole(role);
+                    updateTrouble(role);
+                  }}
+                >
+                  {role.role_name}
+                </Text>
+                <Divider my="xs" variant="dashed"></Divider>
+              </>
             ))}
           </ScrollArea>
         </Stack>
-        <Stack component="div" h="auto">
+        <Stack component="div" h="auto" className="bg-sky-50">
           <Button disabled={!selectedRole} onClick={() => setOpenTroubleModal(true)}>
             add
           </Button>
@@ -176,26 +195,32 @@ export default function Idea() {
               Submit
             </Button>
           </Modal>
-          <ScrollArea h={250}>
+          <ScrollArea sx={{ height: `${height - 100}px` }}>
             {troubleList.map((trouble) => (
-              <Text
-                key={trouble.id}
-                style={{
-                  backgroundColor:
-                    selectedTrouble && selectedTrouble.id === trouble.id ? 'blue' : 'transparent',
-                  cursor: 'pointer',
-                  padding: '4px',
-                }}
-                onClick={() => {
-                  setSelectedTrouble(trouble);
-                }}
-              >
-                {trouble.trouble_name}
-              </Text>
+              <>
+                <Text
+                  mx="xs"
+                  fz="sm"
+                  key={trouble.id}
+                  style={{
+                    backgroundColor:
+                      selectedTrouble && selectedTrouble.id === trouble.id
+                        ? 'rgb(14 165 233)'
+                        : 'transparent',
+                    cursor: 'pointer',
+                  }}
+                  onClick={() => {
+                    setSelectedTrouble(trouble);
+                  }}
+                >
+                  {trouble.trouble_name}
+                </Text>
+                <Divider my="xs" variant="dashed"></Divider>
+              </>
             ))}
           </ScrollArea>
         </Stack>
-        <Stack component="div" h="auto">
+        <Stack component="div" h="auto" className="bg-red-50	">
           <Button onClick={() => setOpenSuperpowerModal(true)}>add</Button>
           <Modal opened={openSuperpowerModal} onClose={() => setOpenSuperpowerModal(false)}>
             <TextInput
@@ -218,30 +243,35 @@ export default function Idea() {
               Submit
             </Button>
           </Modal>
-          <ScrollArea h={250}>
+          <ScrollArea sx={{ height: `${height - 100}px` }}>
             {superPowerList.map((superpower) => (
-              <Text
-                key={superpower.id}
-                style={{
-                  backgroundColor:
-                    selectedSuperPower && selectedSuperPower.id === superpower.id
-                      ? 'blue'
-                      : 'transparent',
-                  cursor: 'pointer',
-                  padding: '4px',
-                }}
-                onClick={() => {
-                  setSelectedSuperPower(superpower);
-                }}
-              >
-                {superpower.superpower_name}
-              </Text>
+              <>
+                <Text
+                  mx="xs"
+                  fz="sm"
+                  key={superpower.id}
+                  style={{
+                    backgroundColor:
+                      selectedSuperPower && selectedSuperPower.id === superpower.id
+                        ? 'rgb(239 68 68)'
+                        : 'transparent',
+                    cursor: 'pointer',
+                  }}
+                  onClick={() => {
+                    setSelectedSuperPower(superpower);
+                  }}
+                >
+                  {superpower.superpower_name}
+                </Text>
+                <Divider my="xs" variant="dashed"></Divider>
+              </>
             ))}
           </ScrollArea>
         </Stack>
       </SimpleGrid>
-      <Flex justify="flex-end" align="center" direction="row" wrap="nowrap">
+      <Flex className="w-full" justify="center" align="center" direction="row" wrap="nowrap">
         <Button
+          mx="sm"
           disabled={!(selectedRole && selectedTrouble && selectedSuperPower)}
           onClick={() => {
             setOpenIdeaModal(true);
@@ -292,35 +322,41 @@ export default function Idea() {
               ]);
               setOpenIdeaModal(false);
               updateIdeaList();
+              setInputNewInsight('');
+              setInputIdeaName('');
+              setInputAdvantage('');
+              setInputKeyword('');
             }}
           >
             Submit
           </Button>
         </Modal>
       </Flex>
-      {ideaList.map((idea) => (
-        <>
-          <Group>
-            <ActionIcon
-              color="blue"
-              radius="xl"
-              variant="light"
-              onClick={async () => {
-                setCurrentIdea(idea);
-                setOpenIdeaDetailModal(true);
-              }}
-            >
-              <IconDots size="1.125rem" />
-            </ActionIcon>
-            <Text
-              c="dimmed"
-              fw={500}
-              className="w-4/5"
-            >{`${idea.role_name} ${idea.trouble_name},因为${idea.superpower_name}所以可以${idea.new_insight},从而${idea.idea_name}.我适合做这个产品因为${idea.advantage}.产品推广关键词如下:${idea.keyword}`}</Text>
-          </Group>
-          <Divider my="sm" variant="dashed" />
-        </>
-      ))}
+      <ScrollArea className="bg-blue-50" sx={{ height: `${height - 40}px` }}>
+        {ideaList.map((idea) => (
+          <Box component="div" className="w-full">
+            <Group>
+              <ActionIcon
+                color="blue"
+                radius="xl"
+                variant="light"
+                onClick={async () => {
+                  setCurrentIdea(idea);
+                  setOpenIdeaDetailModal(true);
+                }}
+              >
+                <IconDots size="1.125rem" />
+              </ActionIcon>
+              <Text
+                c="dimmed"
+                fw={500}
+                className="w-4/5"
+              >{`${idea.role_name} ${idea.trouble_name}.因为${idea.superpower_name},所以可以${idea.new_insight},从而${idea.idea_name}.我适合做这个产品因为${idea.advantage}.产品推广关键词如下:${idea.keyword}`}</Text>
+            </Group>
+            <Divider my="sm" variant="dashed" />
+          </Box>
+        ))}
+      </ScrollArea>
       <Modal opened={openIdeaDetailModal} onClose={() => setOpenIdeaDetailModal(false)}>
         {currentIdea && (
           <>
