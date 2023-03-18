@@ -1,4 +1,14 @@
-import { Box, Group, Button, Modal, TextInput, Text, Stack } from '@mantine/core';
+import {
+  Box,
+  Group,
+  Button,
+  Modal,
+  TextInput,
+  Text,
+  Stack,
+  ScrollArea,
+  SimpleGrid,
+} from '@mantine/core';
 import { useSupabaseClient, useUser } from '@supabase/auth-helpers-react';
 import { useEffect, useState } from 'react';
 
@@ -42,8 +52,8 @@ export default function Idea() {
 
   return (
     <Box component="div">
-      <Group position="apart" spacing="xs" grow>
-        <Stack component="div">
+      <SimpleGrid cols={3} h={300} className="overflow-hidden bg-red-50">
+        <Stack component="div" h="auto">
           <Button onClick={() => setOpenRoleModal(true)}>add</Button>
           <Modal opened={openRoleModal} onClose={() => setOpenRoleModal(false)}>
             <TextInput
@@ -62,26 +72,30 @@ export default function Idea() {
               Submit
             </Button>
           </Modal>
-          {roleList.map((role) => (
-            <Text
-              key={role.id}
-              style={{
-                backgroundColor:
-                  selectedRole && selectedRole.id === role.id ? 'blue' : 'transparent',
-                cursor: 'pointer',
-                padding: '4px',
-              }}
-              onClick={() => {
-                setSelectedRole(role);
-                updateTrouble(role);
-              }}
-            >
-              {role.role_name}
-            </Text>
-          ))}
+          <ScrollArea h={250}>
+            {roleList.map((role) => (
+              <Text
+                key={role.id}
+                style={{
+                  backgroundColor:
+                    selectedRole && selectedRole.id === role.id ? 'blue' : 'transparent',
+                  cursor: 'pointer',
+                  padding: '4px',
+                }}
+                onClick={() => {
+                  setSelectedRole(role);
+                  updateTrouble(role);
+                }}
+              >
+                {role.role_name}
+              </Text>
+            ))}
+          </ScrollArea>
         </Stack>
-        <Stack component="div">
-          <Button onClick={() => setOpenTroubleModal(true)}>add</Button>
+        <Stack component="div" h="auto">
+          <Button disabled={!selectedRole} onClick={() => setOpenTroubleModal(true)}>
+            add
+          </Button>
           <Modal opened={openTroubleModal} onClose={() => setOpenTroubleModal(false)}>
             <TextInput
               label="Trouble"
@@ -120,8 +134,10 @@ export default function Idea() {
             </Text>
           ))}
         </Stack>
-        <Stack component="div">superpower</Stack>
-      </Group>
+        <Stack component="div" h="auto">
+          superpower
+        </Stack>
+      </SimpleGrid>
     </Box>
   );
 }
