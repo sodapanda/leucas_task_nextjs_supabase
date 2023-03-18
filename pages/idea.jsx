@@ -1,4 +1,14 @@
-import { Box, Button, Modal, TextInput, Text, Stack, ScrollArea, SimpleGrid } from '@mantine/core';
+import {
+  Box,
+  Button,
+  Modal,
+  TextInput,
+  Text,
+  Stack,
+  ScrollArea,
+  SimpleGrid,
+  Flex,
+} from '@mantine/core';
 import { useSupabaseClient, useUser } from '@supabase/auth-helpers-react';
 import { useEffect, useState } from 'react';
 
@@ -19,6 +29,12 @@ export default function Idea() {
   const [inputSuperPower, setInputSuperPower] = useState('');
   const [superPowerList, setSuperPowerList] = useState([]);
   const [selectedSuperPower, setSelectedSuperPower] = useState(null);
+
+  const [openIdeaModal, setOpenIdeaModal] = useState(false);
+  const [inputIdeaName, setInputIdeaName] = useState('');
+  const [inputNewInsight, setInputNewInsight] = useState('');
+  const [inputAdvantage, setInputAdvantage] = useState('');
+  const [inputKeyword, setInputKeyword] = useState('');
 
   useEffect(() => {
     updateRole();
@@ -184,6 +200,61 @@ export default function Idea() {
           </ScrollArea>
         </Stack>
       </SimpleGrid>
+      <Flex justify="flex-end" align="center" direction="row" wrap="nowrap">
+        <Button
+          disabled={!(selectedRole && selectedTrouble && selectedSuperPower)}
+          onClick={() => {
+            setOpenIdeaModal(true);
+          }}
+        >
+          add idea
+        </Button>
+
+        <Modal opened={openIdeaModal} onClose={() => setOpenIdeaModal(false)}>
+          <TextInput
+            label="Idea Name"
+            placeholder="Enter your idea name here"
+            value={inputIdeaName}
+            onChange={(event) => setInputIdeaName(event.target.value)}
+          />
+          <TextInput
+            label="New Insight"
+            placeholder="Enter your new insight here"
+            value={inputNewInsight}
+            onChange={(event) => setInputNewInsight(event.target.value)}
+          />
+          <TextInput
+            label="Advantage"
+            placeholder="Enter your advantage here"
+            value={inputAdvantage}
+            onChange={(event) => setInputAdvantage(event.target.value)}
+          />
+          <TextInput
+            label="Keyword"
+            placeholder="Enter your keyword here"
+            value={inputKeyword}
+            onChange={(event) => setInputKeyword(event.target.value)}
+          />
+          <Button
+            onClick={async () => {
+              await supabase.from('idea').insert([
+                {
+                  user_id: user.id,
+                  superpower_id: selectedSuperPower.id,
+                  trouble_id: selectedTrouble.id,
+                  idea_name: inputIdeaName,
+                  new_insight: inputNewInsight,
+                  advantage: inputAdvantage,
+                  keyword: inputKeyword,
+                },
+              ]);
+              setOpenIdeaModal(false);
+            }}
+          >
+            Submit
+          </Button>
+        </Modal>
+      </Flex>
     </Box>
   );
 }
