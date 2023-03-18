@@ -1,14 +1,4 @@
-import {
-  Box,
-  Group,
-  Button,
-  Modal,
-  TextInput,
-  Text,
-  Stack,
-  ScrollArea,
-  SimpleGrid,
-} from '@mantine/core';
+import { Box, Button, Modal, TextInput, Text, Stack, ScrollArea, SimpleGrid } from '@mantine/core';
 import { useSupabaseClient, useUser } from '@supabase/auth-helpers-react';
 import { useEffect, useState } from 'react';
 
@@ -19,13 +9,20 @@ export default function Idea() {
   const [inputRole, setInputRole] = useState('');
   const [roleList, setRoleList] = useState([]);
   const [selectedRole, setSelectedRole] = useState(null);
+
   const [openTroubleModal, setOpenTroubleModal] = useState(false);
   const [inputTrouble, setInputTrouble] = useState('');
   const [troubleList, setTroubleList] = useState([]);
   const [selectedTrouble, setSelectedTrouble] = useState(null);
 
+  const [openSuperpowerModal, setOpenSuperpowerModal] = useState(false);
+  const [inputSuperPower, setInputSuperPower] = useState('');
+  const [superPowerList, setSuperPowerList] = useState([]);
+  const [selectedSuperPower, setSelectedSuperPower] = useState(null);
+
   useEffect(() => {
     updateRole();
+    updateSuperPower();
   }, []);
 
   async function updateRole() {
@@ -47,6 +44,16 @@ export default function Idea() {
       } else {
         setTroubleList(data);
       }
+    }
+  }
+
+  async function updateSuperPower() {
+    const { data, error } = await supabase.from('superpower').select('*');
+
+    if (error) {
+      setSuperPowerList([]);
+    } else {
+      setSuperPowerList(data);
     }
   }
 
@@ -111,7 +118,7 @@ export default function Idea() {
                     { user_id: user.id, role_id: selectedRole.id, trouble_name: inputTrouble },
                   ]);
                 setOpenTroubleModal(false);
-                updateTrouble();
+                updateTrouble(selectedRole);
               }}
             >
               Submit
@@ -135,7 +142,46 @@ export default function Idea() {
           ))}
         </Stack>
         <Stack component="div" h="auto">
-          superpower
+          <Button onClick={() => setOpenSuperpowerModal(true)}>add</Button>
+          <Modal opened={openSuperpowerModal} onClose={() => setOpenSuperpowerModal(false)}>
+            <TextInput
+              label="Superpower"
+              placeholder="Enter your superpower here"
+              value={inputSuperPower}
+              onChange={(event) => setInputSuperPower(event.target.value)}
+            />
+            <Button
+              onClick={async () => {
+                await supabase
+                  .from('superpower')
+                  .insert([{ user_id: user.id, superpower_name: inputSuperPower }]);
+                setOpenSuperpowerModal(false);
+                updateSuperPower();
+              }}
+            >
+              Submit
+            </Button>
+          </Modal>
+          <ScrollArea h={250}>
+            {superPowerList.map((superpower) => (
+              <Text
+                key={superpower.id}
+                style={{
+                  backgroundColor:
+                    selectedSuperPower && selectedSuperPower.id === superpower.id
+                      ? 'blue'
+                      : 'transparent',
+                  cursor: 'pointer',
+                  padding: '4px',
+                }}
+                onClick={() => {
+                  setSelectedSuperPower(superpower);
+                }}
+              >
+                {superpower.superpower_name}
+              </Text>
+            ))}
+          </ScrollArea>
         </Stack>
       </SimpleGrid>
     </Box>
