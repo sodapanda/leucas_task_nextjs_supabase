@@ -56,6 +56,7 @@ export default function App({
                       <Tabs.Tab value="/tasklist">任务</Tabs.Tab>
                       <Tabs.Tab value="/history">历史</Tabs.Tab>
                       <Tabs.Tab value="/account">个人</Tabs.Tab>
+                      <Tabs.Tab value="/idea">idea</Tabs.Tab>
                     </Tabs.List>
                   </Tabs>
                   <div className="w-full grow shrink-0">
