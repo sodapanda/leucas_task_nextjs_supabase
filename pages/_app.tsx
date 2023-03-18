@@ -55,9 +55,9 @@ export default function App({
                       <Tabs.Tab value="/clock">打卡</Tabs.Tab>
                       <Tabs.Tab value="/tasklist">任务</Tabs.Tab>
                       <Tabs.Tab value="/history">历史</Tabs.Tab>
-                      <Tabs.Tab value="/account">个人</Tabs.Tab>
                       <Tabs.Tab value="/idea">idea</Tabs.Tab>
-                      <Tabs.Tab value="/">login</Tabs.Tab>
+                      <Tabs.Tab value="/account">个人</Tabs.Tab>
+                      <Tabs.Tab value="/">登录</Tabs.Tab>
                     </Tabs.List>
                   </Tabs>
                   <div className="w-full grow shrink-0">
