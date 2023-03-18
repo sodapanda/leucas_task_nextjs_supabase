@@ -201,7 +201,7 @@ export default function TaskList() {
         <Divider my="sm" variant="dashed" />
 
         {taskList.map((taskTypeItem) => (
-          <Box component="div" key={taskTypeItem.tasktype}>
+          <Box component="div" mt="md" mb="sm" key={taskTypeItem.tasktype}>
             <Text mt="sm" fz="lg" fw={500} c="dimmed">
               {taskTypeItem.tasktype}
             </Text>
@@ -247,6 +247,7 @@ export default function TaskList() {
                 <Text fz="xs" c="dimmed" mx="xl" truncate lineClamp={1}>
                   {task.step}
                 </Text>
+                <Divider my="sm" variant="dashed" />
               </Box>
             ))}
           </Box>
