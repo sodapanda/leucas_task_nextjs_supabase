@@ -5,12 +5,16 @@ import {
   TextInput,
   Text,
   Stack,
+  Group,
+  ActionIcon,
+  Divider,
   ScrollArea,
   SimpleGrid,
   Flex,
 } from '@mantine/core';
 import { useSupabaseClient, useUser } from '@supabase/auth-helpers-react';
 import { useEffect, useState } from 'react';
+import { IconDots } from '@tabler/icons';
 
 export default function Idea() {
   const supabase = useSupabaseClient();
@@ -37,6 +41,9 @@ export default function Idea() {
   const [inputKeyword, setInputKeyword] = useState('');
 
   const [ideaList, setIdeaList] = useState([]);
+
+  const [openIdeaDetailModal, setOpenIdeaDetailModal] = useState(false);
+  const [currentIdea, setCurrentIdea] = useState(null);
 
   useEffect(() => {
     updateRole();
@@ -98,7 +105,6 @@ export default function Idea() {
       setIdeaList(data);
     }
   }
-
   return (
     <Box component="div">
       <SimpleGrid cols={3} h={300} className="overflow-hidden bg-red-50">
@@ -194,7 +200,7 @@ export default function Idea() {
           <Modal opened={openSuperpowerModal} onClose={() => setOpenSuperpowerModal(false)}>
             <TextInput
               label="Superpower"
-              placeholder="Enter your superpower here"
+              placeholder="因为..SDK..算法能干.."
               value={inputSuperPower}
               onChange={(event) => setInputSuperPower(event.target.value)}
             />
@@ -246,26 +252,27 @@ export default function Idea() {
 
         <Modal opened={openIdeaModal} onClose={() => setOpenIdeaModal(false)}>
           <TextInput
-            label="Idea Name"
-            placeholder="Enter your idea name here"
-            value={inputIdeaName}
-            onChange={(event) => setInputIdeaName(event.target.value)}
-          />
-          <TextInput
             label="New Insight"
-            placeholder="Enter your new insight here"
+            placeholder="可以让..来干.."
             value={inputNewInsight}
             onChange={(event) => setInputNewInsight(event.target.value)}
           />
           <TextInput
+            label="Idea Name"
+            placeholder="从而使用户..."
+            value={inputIdeaName}
+            onChange={(event) => setInputIdeaName(event.target.value)}
+          />
+
+          <TextInput
             label="Advantage"
-            placeholder="Enter your advantage here"
+            placeholder="我适合做这个产品因为.."
             value={inputAdvantage}
             onChange={(event) => setInputAdvantage(event.target.value)}
           />
           <TextInput
             label="Keyword"
-            placeholder="Enter your keyword here"
+            placeholder="推广用的关键词"
             value={inputKeyword}
             onChange={(event) => setInputKeyword(event.target.value)}
           />
@@ -292,8 +299,47 @@ export default function Idea() {
         </Modal>
       </Flex>
       {ideaList.map((idea) => (
-        <Text>{`${idea.role_name} ${idea.trouble_name} ${idea.superpower_name} ${idea.idea_name} ${idea.new_insight} ${idea.advantage} ${idea.keyword}`}</Text>
+        <>
+          <Group>
+            <ActionIcon
+              color="blue"
+              radius="xl"
+              variant="light"
+              onClick={async () => {
+                setCurrentIdea(idea);
+                setOpenIdeaDetailModal(true);
+              }}
+            >
+              <IconDots size="1.125rem" />
+            </ActionIcon>
+            <Text
+              c="dimmed"
+              fw={500}
+              className="w-4/5"
+            >{`${idea.role_name} ${idea.trouble_name},因为${idea.superpower_name}所以可以${idea.new_insight},从而${idea.idea_name}.我适合做这个产品因为${idea.advantage}.产品推广关键词如下:${idea.keyword}`}</Text>
+          </Group>
+          <Divider my="sm" variant="dashed" />
+        </>
       ))}
+      <Modal opened={openIdeaDetailModal} onClose={() => setOpenIdeaDetailModal(false)}>
+        {currentIdea && (
+          <>
+            <Text>
+              {`${currentIdea.role_name} ${currentIdea.trouble_name} ${currentIdea.superpower_name} ${currentIdea.idea_name} ${currentIdea.new_insight} ${currentIdea.advantage} ${currentIdea.keyword}`}
+            </Text>
+
+            <Button
+              onClick={async () => {
+                await supabase.from('idea').delete().eq('id', currentIdea.id);
+                setOpenIdeaDetailModal(false);
+                updateIdeaList();
+              }}
+            >
+              Delete Idea
+            </Button>
+          </>
+        )}
+      </Modal>
     </Box>
   );
 }
