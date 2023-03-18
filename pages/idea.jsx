@@ -332,11 +332,13 @@ export default function Idea() {
           </Button>
         </Modal>
       </Flex>
-      <ScrollArea className="bg-blue-50" sx={{ height: `${height - 40}px` }}>
+      <ScrollArea className="bg-teal-50	" sx={{ height: `${height - 40}px` }}>
         {ideaList.map((idea) => (
           <Box component="div" className="w-full">
+            <Divider my="sm" variant="dashed" />
             <Group>
               <ActionIcon
+                ml="sm"
                 color="blue"
                 radius="xl"
                 variant="light"
@@ -348,22 +350,17 @@ export default function Idea() {
                 <IconDots size="1.125rem" />
               </ActionIcon>
               <Text
-                c="dimmed"
-                fw={500}
-                className="w-4/5"
+                fz="sm"
+                c="dark"
+                className="w-[90%]"
               >{`${idea.role_name} ${idea.trouble_name}.因为${idea.superpower_name},所以可以${idea.new_insight},从而${idea.idea_name}.我适合做这个产品因为${idea.advantage}.产品推广关键词如下:${idea.keyword}`}</Text>
             </Group>
-            <Divider my="sm" variant="dashed" />
           </Box>
         ))}
       </ScrollArea>
       <Modal opened={openIdeaDetailModal} onClose={() => setOpenIdeaDetailModal(false)}>
         {currentIdea && (
           <>
-            <Text>
-              {`${currentIdea.role_name} ${currentIdea.trouble_name} ${currentIdea.superpower_name} ${currentIdea.idea_name} ${currentIdea.new_insight} ${currentIdea.advantage} ${currentIdea.keyword}`}
-            </Text>
-
             <Button
               onClick={async () => {
                 await supabase.from('idea').delete().eq('id', currentIdea.id);
