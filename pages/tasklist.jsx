@@ -9,6 +9,7 @@ import {
   Box,
   Card,
   Flex,
+  Textarea,
   Modal,
   Divider,
 } from '@mantine/core';
@@ -83,14 +84,20 @@ export default function TaskList() {
               setInEditTask({ ...inEditTask, power: event });
             }}
           />
-          <TextInput
+          <Divider my="sm" variant="dashed" />
+          <Textarea
+            placeholder="Your comment"
+            label="随手记录"
+            autosize
+            minRows={2}
+            maxRows={10}
             value={inEditTask.step}
-            label="当前步骤"
             onChange={(event) => {
               const newStep = event.currentTarget.value;
               setInEditTask({ ...inEditTask, step: newStep });
             }}
           />
+          <Divider my="sm" variant="dashed" />
 
           <Button
             variant="light"
