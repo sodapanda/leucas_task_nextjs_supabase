@@ -8,6 +8,8 @@ import {
   IconBrandVolkswagen,
   IconRefreshDot,
   IconPlayerPlay,
+  IconVolume,
+  IconVolume3,
   IconPlayerPause,
 } from '@tabler/icons';
 const statusRuning = 'runing';
@@ -30,6 +32,8 @@ export default function Clock() {
   const [dayLeft, setDayLeft] = useState({});
   const [timeNeed, setTimeNeed] = useState({});
   const workHours = 8;
+
+  const [isMuted, setIsMuted] = useState(false);
 
   const { days, hours, minutes, seconds, isRunning, start, pause, reset } = useStopwatch({
     autoStart: false,
@@ -122,7 +126,9 @@ export default function Clock() {
 
     await supabase.from('task_history').upsert(deepCopiedTaskList, { onConflict: 'id' });
 
-    audioRef.current?.play();
+    if (!isMuted) {
+      audioRef.current?.play();
+    }
   }
 
   useEffect(() => {
@@ -253,6 +259,15 @@ export default function Clock() {
             <IconRefreshDot size={18} />
           </ActionIcon>
         )}
+        <ActionIcon
+          color="blue"
+          variant="filled"
+          onClick={() => {
+            setIsMuted(!isMuted);
+          }}
+        >
+          {isMuted ? <IconVolume size={18} /> : <IconVolume3 size={18} />}
+        </ActionIcon>
       </div>
 
       <div className="h-8 bg-red-50" style={dayLeft}></div>
