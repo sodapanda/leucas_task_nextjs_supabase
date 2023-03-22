@@ -6,6 +6,7 @@ import {
   NumberInput,
   Group,
   Checkbox,
+  Stack,
   Box,
   Card,
   Flex,
@@ -15,7 +16,7 @@ import {
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { ActionIcon } from '@mantine/core';
-import { IconTrash, IconPencil } from '@tabler/icons';
+import { IconTrash, IconPencil, IconPlaylistAdd } from '@tabler/icons';
 import { useState, useEffect } from 'react';
 import { useUser, useSupabaseClient } from '@supabase/auth-helpers-react';
 
@@ -31,10 +32,15 @@ export default function TaskList() {
   const [taskList, setTaskList] = useState([]);
   const [opened, { open, close }] = useDisclosure(false);
   const [inEditTask, setInEditTask] = useState({});
+  const [showStackModal, setShowStackModal] = useState(false);
+  const [stackNote, setStackNote] = useState('');
+  const [currentStackTask, setCurrentStackTask] = useState({});
+  const [taskStack, setTaskStack] = useState([]);
 
   useEffect(() => {
     updateTaskTypeList();
     updateTaskList();
+    updateTaskStack();
   }, []);
 
   async function updateTaskTypeList() {
@@ -74,10 +80,30 @@ export default function TaskList() {
     }
   }
 
+  async function updateTaskStack() {
+    const { data, error } = await supabase
+      .from('task_stack_view')
+      .select('*')
+      .order('id', { ascending: false });
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    setTaskStack(data);
+  }
+
   return (
     <>
       <Modal opened={opened} onClose={close}>
         <Card shadow="sm" padding="lg" radius="md" withBorder>
+          <TextInput
+            placeholder="task name"
+            value={inEditTask.task_name}
+            onChange={(event) => {
+              setInEditTask({ ...inEditTask, task_name: event.target.value });
+            }}
+          />
           <NumberInput
             value={inEditTask.power}
             onChange={async (event) => {
@@ -97,6 +123,18 @@ export default function TaskList() {
               setInEditTask({ ...inEditTask, step: newStep });
             }}
           />
+          <Textarea
+            placeholder="最新进展"
+            label="当前"
+            autosize
+            minRows={2}
+            maxRows={10}
+            value={inEditTask.current_frame}
+            onChange={(event) => {
+              const new_current_frame = event.currentTarget.value;
+              setInEditTask({ ...inEditTask, current_frame: new_current_frame });
+            }}
+          />
           <Divider my="sm" variant="dashed" />
 
           <Button
@@ -108,7 +146,12 @@ export default function TaskList() {
             onClick={async () => {
               await supabase
                 .from('tasks')
-                .update({ power: inEditTask.power, step: inEditTask.step })
+                .update({
+                  power: inEditTask.power,
+                  step: inEditTask.step,
+                  current_frame: inEditTask.current_frame,
+                  task_name: inEditTask.task_name,
+                })
                 .eq('id', inEditTask.id);
               updateTaskList();
               close();
@@ -116,6 +159,42 @@ export default function TaskList() {
           >
             save
           </Button>
+        </Card>
+      </Modal>
+
+      <Modal
+        opened={showStackModal}
+        onClose={() => {
+          setShowStackModal(false);
+          setCurrentStackTask({});
+        }}
+      >
+        <Card shadow="sm" padding="lg" radius="md" withBorder>
+          <Stack>
+            <TextInput
+              label="note"
+              placeholder="卡在哪了"
+              value={stackNote}
+              onChange={(event) => {
+                setStackNote(event.target.value);
+              }}
+            />
+            <Button
+              onClick={async () => {
+                await supabase.from('task_stack').insert([
+                  {
+                    note: stackNote,
+                    task_id: currentStackTask.id,
+                    user_id: user.id,
+                  },
+                ]);
+                setShowStackModal(false);
+                updateTaskStack();
+              }}
+            >
+              add
+            </Button>
+          </Stack>
         </Card>
       </Modal>
       <div className="w-ful mt-4">
@@ -207,6 +286,29 @@ export default function TaskList() {
 
         <Divider my="sm" variant="dashed" />
 
+        <Stack>
+          {taskStack.map((taskFrame, index) => (
+            <Flex gap="xs" justify="center" align="center" direction="row" wrap="nowrap">
+              {index === 0 && (
+                <ActionIcon
+                  color="blue"
+                  radius="xl"
+                  variant="light"
+                  onClick={async () => {
+                    await supabase.from('task_stack').delete().eq('id', taskFrame.id);
+                    updateTaskStack();
+                  }}
+                >
+                  <IconTrash size="1rem" />
+                </ActionIcon>
+              )}
+              <Text fz="xs">{`${taskFrame.task_name} / ${taskFrame.current_frame} / ${taskFrame.note}`}</Text>
+            </Flex>
+          ))}
+        </Stack>
+
+        <Divider my="sm" variant="dashed" />
+
         {taskList.map((taskTypeItem) => (
           <Box component="div" mt="md" mb="sm" key={taskTypeItem.tasktype}>
             <Text mt="sm" fz="lg" fw={500} c="dimmed">
@@ -225,6 +327,17 @@ export default function TaskList() {
                     }}
                   >
                     <IconPencil size="1rem" />
+                  </ActionIcon>
+                  <ActionIcon
+                    color="blue"
+                    radius="xl"
+                    variant="light"
+                    onClick={async () => {
+                      setCurrentStackTask(task);
+                      setShowStackModal(true);
+                    }}
+                  >
+                    <IconPlaylistAdd size="1rem" />
                   </ActionIcon>
                   <ActionIcon
                     color="blue"
