@@ -16,13 +16,15 @@ import {
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { ActionIcon } from '@mantine/core';
-import { IconTrash, IconPencil, IconPlaylistAdd } from '@tabler/icons';
+import { IconTrash, IconPencil, IconPlaylistAdd, IconChevronsRight } from '@tabler/icons';
 import { useState, useEffect } from 'react';
 import { useUser, useSupabaseClient } from '@supabase/auth-helpers-react';
+import { useRouter } from 'next/router';
 
 export default function TaskList() {
   const user = useUser();
   const supabase = useSupabaseClient();
+  const router = useRouter();
 
   const [addTaskType, setAddTaskType] = useState('');
   const [selectedTaskType, setSelectedTaskType] = useState('');
@@ -36,11 +38,14 @@ export default function TaskList() {
   const [stackNote, setStackNote] = useState('');
   const [currentStackTask, setCurrentStackTask] = useState({});
   const [taskStack, setTaskStack] = useState([]);
+  const [ideaList, setIdeaList] = useState([]);
+  const [selectedIdea, setSelectedidea] = useState({});
 
   useEffect(() => {
     updateTaskTypeList();
     updateTaskList();
     updateTaskStack();
+    updateIdeaList();
   }, []);
 
   async function updateTaskTypeList() {
@@ -93,6 +98,21 @@ export default function TaskList() {
     setTaskStack(data);
   }
 
+  async function updateIdeaList() {
+    const { data, error } = await supabase.from('idea').select('*');
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    data.forEach((element) => {
+      element.label = element.idea_name;
+      element.value = element.idea_name;
+    });
+
+    setIdeaList(data);
+  }
+
   return (
     <>
       <Modal opened={opened} onClose={close}>
@@ -110,6 +130,15 @@ export default function TaskList() {
               setInEditTask({ ...inEditTask, power: event });
             }}
           />
+          <Select
+            label="哪个idea"
+            data={ideaList}
+            value={ideaList.find((ideaItem) => ideaItem.id === inEditTask.idea_id)?.idea_name || ''}
+            onChange={(item) => {
+              const mIdea = ideaList.find((ideaItem) => ideaItem.idea_name === item);
+              setInEditTask({ ...inEditTask, idea_id: mIdea.id });
+            }}
+          />
           <Divider my="sm" variant="dashed" />
           <Textarea
             placeholder="Your comment"
@@ -121,6 +150,18 @@ export default function TaskList() {
             onChange={(event) => {
               const newStep = event.currentTarget.value;
               setInEditTask({ ...inEditTask, step: newStep });
+            }}
+          />
+          <Textarea
+            placeholder="功能列表"
+            label="功能和好处列表为了推广文案用"
+            autosize
+            minRows={2}
+            maxRows={10}
+            value={inEditTask.features ? inEditTask.features : ''}
+            onChange={(event) => {
+              const newFeatures = event.currentTarget.value;
+              setInEditTask({ ...inEditTask, features: newFeatures });
             }}
           />
           <Textarea
@@ -151,6 +192,8 @@ export default function TaskList() {
                   step: inEditTask.step,
                   current_frame: inEditTask.current_frame,
                   task_name: inEditTask.task_name,
+                  idea_id: inEditTask.idea_id,
+                  features: inEditTask.features,
                 })
                 .eq('id', inEditTask.id);
               updateTaskList();
@@ -253,6 +296,15 @@ export default function TaskList() {
           data={taskTypeList}
           onChange={setSelectedTaskType}
         />
+        <Select
+          label="哪个idea"
+          data={ideaList}
+          value={selectedIdea.idea_name ? selectedIdea.idea_name : ''}
+          onChange={(item) => {
+            const mIdea = ideaList.find((ideaItem) => ideaItem.idea_name === item);
+            setSelectedidea(mIdea);
+          }}
+        />
         <TextInput
           label="任务"
           value={addTaskName}
@@ -260,6 +312,7 @@ export default function TaskList() {
             setAddTaskName(event.currentTarget.value);
           }}
         />
+
         <NumberInput label="优先级" value={rank} onChange={setRank} />
         <Flex mt="xs" gap="sm" justify="flex-end" align="center" direction="row" wrap="nowrap">
           <Button
@@ -271,12 +324,14 @@ export default function TaskList() {
                   task_name: addTaskName,
                   user_id: user.id,
                   tasktype: selectedTaskType,
+                  idea_id: selectedIdea.id,
                   step: 'init',
                 },
               ]);
 
               setSelectedTaskType('');
               setAddTaskName('');
+              setSelectedidea({});
               updateTaskList();
             }}
           >
@@ -288,7 +343,14 @@ export default function TaskList() {
 
         <Stack>
           {taskStack.map((taskFrame, index) => (
-            <Flex gap="xs" justify="center" align="center" direction="row" wrap="nowrap">
+            <Flex
+              key={taskFrame.id}
+              gap="xs"
+              justify="center"
+              align="center"
+              direction="row"
+              wrap="nowrap"
+            >
               {index === 0 && (
                 <ActionIcon
                   color="blue"
@@ -349,6 +411,19 @@ export default function TaskList() {
                     }}
                   >
                     <IconTrash size="1rem" />
+                  </ActionIcon>
+                  <ActionIcon
+                    color="blue"
+                    radius="xl"
+                    variant="light"
+                    onClick={async () => {
+                      router.push({
+                        pathname: '/story',
+                        query: { taskid: task.id },
+                      });
+                    }}
+                  >
+                    <IconChevronsRight size="1rem" />
                   </ActionIcon>
                   <Text fz="sm" fw={700} c="blue">
                     {task.power}
