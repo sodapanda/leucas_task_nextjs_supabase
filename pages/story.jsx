@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useUser, useSupabaseClient } from '@supabase/auth-helpers-react';
-import { Text, Divider, Group, Button, Box } from '@mantine/core';
+import { Text, Divider, Group, Button, Box, TextInput } from '@mantine/core';
 import { Skeleton } from '@mantine/core';
 
 export default function Story() {
@@ -11,7 +11,7 @@ export default function Story() {
   const [ideaMsg, setIdeaMsg] = useState('');
   const [gptResult, setGptResult] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const apiKey = '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';
+  const [apikey, setApiKey] = useState('');
 
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
@@ -55,7 +55,7 @@ export default function Story() {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`,
+        Authorization: `Bearer ${apikey}`,
       },
       body: JSON.stringify({
         model: `gpt-3.5-turbo`,
@@ -76,6 +76,14 @@ export default function Story() {
 
   return (
     <Box component="div" className="w-full" px="xs">
+      <TextInput
+        label="api Key"
+        placeholder="sk-xxx"
+        value={apikey}
+        onChange={(event) => {
+          setApiKey(event.target.value);
+        }}
+      />
       <Text>{ideaMsg}</Text>
       <Divider my="sm" variant="dashed" />
       <Text>{task.features}</Text>
