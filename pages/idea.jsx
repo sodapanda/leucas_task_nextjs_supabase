@@ -280,13 +280,13 @@ export default function Idea() {
         <Modal opened={openIdeaModal} onClose={() => setOpenIdeaModal(false)}>
           <TextInput
             label="New Insight"
-            placeholder="可以让..来干.."
+            placeholder="可以(用..干..)"
             value={inputNewInsight}
             onChange={(event) => setInputNewInsight(event.target.value)}
           />
           <TextInput
             label="Idea Name"
-            placeholder="从而使用户..."
+            placeholder="从而(使用户..)"
             value={inputIdeaName}
             onChange={(event) => setInputIdeaName(event.target.value)}
           />
@@ -350,7 +350,7 @@ export default function Idea() {
                 fz="sm"
                 c="dark"
                 className="w-[90%]"
-              >{`${idea.role_name} ${idea.trouble_name}.因为${idea.superpower_name},所以可以${idea.new_insight},从而${idea.idea_name}.我适合做这个产品因为${idea.advantage}.产品推广关键词如下:${idea.keyword}`}</Text>
+              >{`${idea.role_name}${idea.trouble_name}.因为${idea.superpower_name},所以可以${idea.new_insight},从而${idea.idea_name}.我适合做这个产品因为${idea.advantage}.产品推广关键词如下:${idea.keyword}`}</Text>
             </Group>
           </Box>
         ))}
