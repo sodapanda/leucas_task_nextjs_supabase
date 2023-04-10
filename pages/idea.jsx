@@ -14,7 +14,7 @@ import {
 } from '@mantine/core';
 import { useSupabaseClient, useUser } from '@supabase/auth-helpers-react';
 import { useEffect, useState } from 'react';
-import { IconDots } from '@tabler/icons';
+import { IconDots, IconTrash } from '@tabler/icons';
 
 export default function Idea() {
   const supabase = useSupabaseClient();
@@ -145,23 +145,43 @@ export default function Idea() {
           <ScrollArea sx={{ height: `${height - 100}px` }}>
             {roleList.map((role) => (
               <Box component="div" key={role.id}>
-                <Text
-                  mx="xs"
-                  fz="sm"
-                  style={{
-                    backgroundColor:
-                      selectedRole && selectedRole.id === role.id
-                        ? 'rgb(6 182 212)'
-                        : 'transparent',
-                    cursor: 'pointer',
-                  }}
-                  onClick={() => {
-                    setSelectedRole(role);
-                    updateTrouble(role);
-                  }}
-                >
-                  {role.role_name}
-                </Text>
+                <Flex gap="sm" justify="flex-start" align="center" direction="row" wrap="nowrap">
+                  <ActionIcon
+                    color="blue"
+                    radius="lg"
+                    variant="filled"
+                    ml="sm"
+                    onClick={async () => {
+                      const { data, error } = await supabase
+                        .from('role')
+                        .delete()
+                        .eq('id', `${role.id}`);
+                      if (error) {
+                        alert(error.message);
+                      }
+                      updateRole();
+                    }}
+                  >
+                    <IconTrash size="1rem" />
+                  </ActionIcon>
+                  <Text
+                    mx="xs"
+                    fz="sm"
+                    style={{
+                      backgroundColor:
+                        selectedRole && selectedRole.id === role.id
+                          ? 'rgb(6 182 212)'
+                          : 'transparent',
+                      cursor: 'pointer',
+                    }}
+                    onClick={() => {
+                      setSelectedRole(role);
+                      updateTrouble(role);
+                    }}
+                  >
+                    {role.role_name}
+                  </Text>
+                </Flex>
                 <Divider my="xs" variant="dashed"></Divider>
               </Box>
             ))}
@@ -197,22 +217,42 @@ export default function Idea() {
           <ScrollArea sx={{ height: `${height - 100}px` }}>
             {troubleList.map((trouble) => (
               <Box component="div" key={trouble.id}>
-                <Text
-                  mx="xs"
-                  fz="sm"
-                  style={{
-                    backgroundColor:
-                      selectedTrouble && selectedTrouble.id === trouble.id
-                        ? 'rgb(14 165 233)'
-                        : 'transparent',
-                    cursor: 'pointer',
-                  }}
-                  onClick={() => {
-                    setSelectedTrouble(trouble);
-                  }}
-                >
-                  {trouble.trouble_name}
-                </Text>
+                <Flex gap="sm" justify="flex-start" align="center" direction="row" wrap="nowrap">
+                  <ActionIcon
+                    color="blue"
+                    radius="lg"
+                    variant="filled"
+                    ml="sm"
+                    onClick={async () => {
+                      const { data, error } = await supabase
+                        .from('trouble')
+                        .delete()
+                        .eq('id', `${trouble.id}`);
+                      if (error) {
+                        alert(error.message);
+                      }
+                      updateTrouble(selectedRole);
+                    }}
+                  >
+                    <IconTrash size="1rem" />
+                  </ActionIcon>
+                  <Text
+                    mx="xs"
+                    fz="sm"
+                    style={{
+                      backgroundColor:
+                        selectedTrouble && selectedTrouble.id === trouble.id
+                          ? 'rgb(14 165 233)'
+                          : 'transparent',
+                      cursor: 'pointer',
+                    }}
+                    onClick={() => {
+                      setSelectedTrouble(trouble);
+                    }}
+                  >
+                    {trouble.trouble_name}
+                  </Text>
+                </Flex>
                 <Divider my="xs" variant="dashed"></Divider>
               </Box>
             ))}
@@ -244,22 +284,42 @@ export default function Idea() {
           <ScrollArea sx={{ height: `${height - 100}px` }}>
             {superPowerList.map((superpower) => (
               <Box component="div" key={superpower.id}>
-                <Text
-                  mx="xs"
-                  fz="sm"
-                  style={{
-                    backgroundColor:
-                      selectedSuperPower && selectedSuperPower.id === superpower.id
-                        ? 'rgb(239 68 68)'
-                        : 'transparent',
-                    cursor: 'pointer',
-                  }}
-                  onClick={() => {
-                    setSelectedSuperPower(superpower);
-                  }}
-                >
-                  {superpower.superpower_name}
-                </Text>
+                <Flex gap="sm" justify="flex-start" align="center" direction="row" wrap="nowrap">
+                  <ActionIcon
+                    color="blue"
+                    radius="lg"
+                    variant="filled"
+                    ml="sm"
+                    onClick={async () => {
+                      const { data, error } = await supabase
+                        .from('superpower')
+                        .delete()
+                        .eq('id', `${superpower.id}`);
+                      if (error) {
+                        alert(error.message);
+                      }
+                      updateSuperPower();
+                    }}
+                  >
+                    <IconTrash size="1rem" />
+                  </ActionIcon>
+                  <Text
+                    mx="xs"
+                    fz="sm"
+                    style={{
+                      backgroundColor:
+                        selectedSuperPower && selectedSuperPower.id === superpower.id
+                          ? 'rgb(239 68 68)'
+                          : 'transparent',
+                      cursor: 'pointer',
+                    }}
+                    onClick={() => {
+                      setSelectedSuperPower(superpower);
+                    }}
+                  >
+                    {superpower.superpower_name}
+                  </Text>
+                </Flex>
                 <Divider my="xs" variant="dashed"></Divider>
               </Box>
             ))}
