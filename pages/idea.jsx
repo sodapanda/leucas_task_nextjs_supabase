@@ -126,7 +126,7 @@ export default function Idea() {
           <Modal opened={openRoleModal} onClose={() => setOpenRoleModal(false)}>
             <TextInput
               label="角色"
-              placeholder="...的人 ...的用户 ...爱好者"
+              placeholder="...的人 ...的用户 ...爱好者 ...消费者"
               value={inputRole}
               onChange={(event) => setInputRole(event.target.value)}
             />
