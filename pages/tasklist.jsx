@@ -240,7 +240,7 @@ export default function TaskList() {
           </Stack>
         </Card>
       </Modal>
-      <div className="w-ful mt-4">
+      <div className="w-ful mt-4 ml-4 mr-4">
         {taskTypeList.map((typeItem) => (
           <Group key={typeItem.id} mb="xs" ml="xs">
             <ActionIcon

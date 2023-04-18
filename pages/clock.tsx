@@ -104,10 +104,10 @@ export default function Clock() {
 
   async function updateHistory(cTasks: any[]) {
     tickCount.current = 0;
-    let screenshotFileName = await (window as any).versions?.screenshot();
-    if (!screenshotFileName) {
-      screenshotFileName = 'empty';
-    }
+    // let screenshotFileName = await (window as any).versions?.screenshot();
+    // if (!screenshotFileName) {
+    //   screenshotFileName = 'empty';
+    // }
 
     const deepCopiedTaskList = JSON.parse(JSON.stringify(cTasks)) as any[];
     deepCopiedTaskList.map((item) => {
@@ -116,13 +116,13 @@ export default function Clock() {
       return item;
     });
 
-    await supabase.from('screen_shot').insert([
-      {
-        date: formattedDate,
-        file_name: screenshotFileName,
-        user_id: user?.id,
-      },
-    ]);
+    // await supabase.from('screen_shot').insert([
+    //   {
+    //     date: formattedDate,
+    //     file_name: screenshotFileName,
+    //     user_id: user?.id,
+    //   },
+    // ]);
 
     await supabase.from('task_history').upsert(deepCopiedTaskList, { onConflict: 'id' });
 
