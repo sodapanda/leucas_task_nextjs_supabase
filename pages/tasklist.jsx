@@ -371,6 +371,8 @@ export default function TaskList() {
 
         <Divider my="sm" variant="dashed" />
 
+        <Text c="blue">注意：同一个任务分类下最好只有一个是激活状态，不然时间不够分的</Text>
+
         {taskList.map((taskTypeItem) => (
           <Box component="div" mt="md" mb="sm" key={taskTypeItem.tasktype}>
             <Text mt="sm" fz="lg" fw={500} c="dimmed">
