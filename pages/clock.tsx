@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
-import { ActionIcon, Text } from '@mantine/core';
-import { format } from 'date-fns';
+import { ActionIcon, Text, Indicator } from '@mantine/core';
+import { format, parse } from 'date-fns';
 import { useSupabaseClient, useUser } from '@supabase/auth-helpers-react';
 import { useStopwatch } from 'react-timer-hook';
+import { Calendar } from '@mantine/dates';
 
 import {
   IconBrandVolkswagen,
@@ -39,6 +40,8 @@ export default function Clock() {
     autoStart: false,
   });
 
+  const [historyList, setHistory] = useState<any>([]);
+
   useEffect(() => {
     audioRef.current = new Audio('/pop-up-something-160353.mp3');
     getHistory();
@@ -51,6 +54,23 @@ export default function Clock() {
         if (!error && data.length > 0) {
           setDuration(data[0].total_count);
         }
+      });
+
+    supabase
+      .from('daily_product_count')
+      .select('*')
+      .order('task_date', { ascending: false })
+      .then((rst) => {
+        rst.data?.map((historyItem) => {
+          const totalCountSeconds = TimeFormat.toS(historyItem.total_count);
+          historyItem.isDone = true;
+          if (totalCountSeconds < 8 * 3600) {
+            historyItem.isDone = false;
+          }
+          historyItem.task_date_d = parse(historyItem.task_date, 'yyyy-MM-dd', new Date())
+          return historyItem;
+        });
+        setHistory(rst.data);
       });
 
     return () => {
@@ -329,6 +349,28 @@ export default function Clock() {
             </div>
           </div>
         ))}
+      <Calendar
+        onChange={(date) => {
+          console.log(date)
+        }}
+
+        renderDay={(date) => {
+          const day = date.getDate();
+          const theDayInHistory = historyList.find((historyItem: any) => {
+            return historyItem.task_date_d.getTime() === date.getTime()
+          });
+          let isDone = false
+          if (theDayInHistory && theDayInHistory.isDone) {
+            isDone = true
+          }
+
+          return (
+            <Indicator size={6} color="red" offset={-2} disabled={!isDone}>
+              <div>{day}</div>
+            </Indicator>
+          );
+        }}
+      />
     </div>
   );
 }
