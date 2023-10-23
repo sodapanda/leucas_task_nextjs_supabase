@@ -129,12 +129,16 @@ export default function Clock() {
     //   screenshotFileName = 'empty';
     // }
 
-    const deepCopiedTaskList = JSON.parse(JSON.stringify(cTasks)) as any[];
-    deepCopiedTaskList.map((item) => {
+    let deepCopiedTaskList = JSON.parse(JSON.stringify(cTasks)) as any[];
+    deepCopiedTaskList = deepCopiedTaskList.map((item) => {
       item.status = undefined;
       item.clickDuration = undefined;
       return item;
     });
+
+    deepCopiedTaskList = JSON.parse(JSON.stringify(deepCopiedTaskList)) as any[];
+
+    console.log(deepCopiedTaskList)
 
     // await supabase.from('screen_shot').insert([
     //   {
