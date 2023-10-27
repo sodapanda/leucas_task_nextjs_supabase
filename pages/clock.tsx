@@ -369,7 +369,7 @@ export default function Clock() {
           }
 
           return (
-            <Indicator size={6} color="red" offset={-2} disabled={!isDone}>
+            <Indicator color="green" position="middle-center" size={15} disabled={!isDone}>
               <div>{day}</div>
             </Indicator>
           );
